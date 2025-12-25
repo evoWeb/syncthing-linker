@@ -1,0 +1,6 @@
+source: /source/
+destination: /destination/
+
+event: create
+recursive: true
+exclude: ".*\\.tmp|.*/shadows/.*|.*/\\.stfolder/.*|.*/config/.*"

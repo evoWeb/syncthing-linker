@@ -1,0 +1,51 @@
+networks:
+  syncthing:
+    external: true
+
+volumes:
+  app:
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: ${APP_FOLDER:-./app}
+  config:
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: ${CONFIG_FOLDER:-./config}
+  source:
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: ${SOURCE_FOLDER:-./files/source}
+  destination:
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: ${DESTINATION_FOLDER:-./files/destination}
+
+services:
+  linker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    #image: python:3-trixie
+    volumes:
+      - app:/usr/src/app
+      - config:/config
+      - source:/source
+      - destination:/destination
+    environment:
+      PUID: 1000
+      PGID: 1000
+      TZ: Europe/Berlin
+      SYNCTHING_HOST: "${SYNCTHING_HOST:-syncthing}"
+      SYNCTHING_PORT: "${SYNCTHING_PORT:-8384}"
+      API_KEY: "${API_KEY}"
+    restart: unless-stopped
+    networks:
+      - syncthing
