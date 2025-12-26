@@ -9,9 +9,8 @@ class Statistics(BaseAPI):
     prefix = '/rest/stats/'
 
     def device(self) -> dict:
-        """ Returns general statistics about devices.
-
-            Currently, it only contains the time the device was last seen.
+        """ Returns general statistics about devices. Currently, only contains the time the device
+            was last seen and the last connection duration.
 
             Returns:
                 dict
@@ -19,9 +18,8 @@ class Statistics(BaseAPI):
         return self.get('device')
 
     def folder(self) -> dict:
-        """ Returns general statistics about folders.
-
-            Currently, it contains the last scan time and the last synced file.
+        """ Returns general statistics about folders. Currently, contains the last scan time and
+            the last synced file.
 
             Returns:
                 dict
