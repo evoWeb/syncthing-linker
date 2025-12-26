@@ -3,8 +3,8 @@ import json
 import logging
 import requests
 
-from SyncthingError import SyncthingError
-from Syncthing import string_types
+from .SyncthingError import SyncthingError
+from .Utilities import string_types
 
 logger = logging.getLogger(__name__)
 DEFAULT_TIMEOUT = 10.0

@@ -1,12 +1,11 @@
 import requests
 import warnings
 
-import BaseAPI
-
-from Syncthing import ErrorEvent
-from Syncthing import keys_to_datetime
-from Syncthing import parse_datetime
-from Syncthing import string_types
+from .BaseAPI import BaseAPI
+from .Utilities import ErrorEvent
+from .Utilities import keys_to_datetime
+from .Utilities import parse_datetime
+from .Utilities import string_types
 
 class System(BaseAPI):
     """ HTTP REST endpoint for System calls."""

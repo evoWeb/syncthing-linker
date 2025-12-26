@@ -1,6 +1,6 @@
-import BaseAPI
+from .BaseAPI import BaseAPI
 
-from Syncthing import string_types
+from .Utilities import string_types
 
 class Database(BaseAPI):
     """ HTTP REST endpoint for Database calls."""

@@ -1,4 +1,4 @@
-import BaseAPI
+from .BaseAPI import BaseAPI
 
 class Misc(BaseAPI):
     """ HTTP REST endpoint for Miscelaneous calls."""

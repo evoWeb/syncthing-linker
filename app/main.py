@@ -3,7 +3,7 @@
 import os
 import time
 import yaml
-from Syncthing.Syncthing import initialize_syncthing
+from Syncthing.Syncthing import syncthing_factory
 
 def load_config(config_path = '/config/config.yaml'):
     """Lädt die Konfiguration aus einer YAML-Datei."""
@@ -23,11 +23,11 @@ config = load_config()
 print(config)
 
 key = os.getenv('SYNCTHING_API_KEY', '')
-
+print(key)
 if key == '':
     raise Exception('No API key found.')
 
-s = initialize_syncthing()
+s = syncthing_factory()
 
 # name spaced by API endpoints
 s.system.connections()
