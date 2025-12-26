@@ -15,13 +15,13 @@ class BaseAPI(object):
     prefix = ''
 
     def __init__(
-            self,
-            api_key,
-            host='localhost',
-            port=8384,
-            timeout=DEFAULT_TIMEOUT,
-            is_https=False,
-            ssl_cert_file=None
+        self,
+        api_key,
+        host='localhost',
+        port=8384,
+        timeout=DEFAULT_TIMEOUT,
+        is_https=False,
+        ssl_cert_file=None
     ):
         if ssl_cert_file:
             if not os.path.exists(ssl_cert_file):
@@ -41,38 +41,38 @@ class BaseAPI(object):
         self._base_url = self.url + '{endpoint}'
 
     def get(
-            self,
-            endpoint,
-            data=None,
-            headers=None,
-            params=None,
-            return_response=False,
-            raw_exceptions=False
+        self,
+        endpoint,
+        data=None,
+        headers=None,
+        params=None,
+        return_response=False,
+        raw_exceptions=False
     ) -> requests.Response | str | dict:
         endpoint = self.prefix + endpoint
         return self._request('GET', endpoint, data, headers, params, return_response, raw_exceptions)
 
     def post(
-            self,
-            endpoint,
-            data=None,
-            headers=None,
-            params=None,
-            return_response=False,
-            raw_exceptions=False
+        self,
+        endpoint,
+        data=None,
+        headers=None,
+        params=None,
+        return_response=False,
+        raw_exceptions=False
     ) -> requests.Response | str | dict:
         endpoint = self.prefix + endpoint
         return self._request('POST', endpoint, data, headers, params, return_response, raw_exceptions)
 
     def _request(
-            self,
-            method,
-            endpoint,
-            data=None,
-            headers=None,
-            params=None,
-            return_response=False,
-            raw_exceptions=False
+        self,
+        method,
+        endpoint,
+        data=None,
+        headers=None,
+        params=None,
+        return_response=False,
+        raw_exceptions=False
     ) -> requests.Response | str | dict:
         method = method.upper()
 
