@@ -8,7 +8,7 @@ import os
 
 from .Database import Database
 from .Events import Events
-from .Misc import Misc
+from .Service import Service
 from .Statistics import Statistics
 from .System import System
 
@@ -37,10 +37,10 @@ class Syncthing(object):
             ssl_cert_file (str)
 
         Attributes:
-            system: instance of :class:`.System`.
-            database: instance of :class:`.Database`.
-            stats: instance of :class:`.Statistics`.
-            misc: instance of :class:`.Misc`.
+            system: instance of :class:`System`.
+            database: instance of :class:`Database`.
+            stats: instance of :class:`Statistics`.
+            service: instance of :class:`Service`.
 
         Note:
             - attribute :attr:`.db` is an alias of :attr:`.database`
@@ -71,7 +71,7 @@ class Syncthing(object):
         self.system = self.sys = System(api_key, **kwargs)
         self.database = self.db = Database(api_key, **kwargs)
         self.stats = Statistics(api_key, **kwargs)
-        self.misc = Misc(api_key, **kwargs)
+        self.service = Service(api_key, **kwargs)
 
     def events(self, last_seen_id=None, filters=None, **kwargs):
         kw = dict(self.__kwargs)
