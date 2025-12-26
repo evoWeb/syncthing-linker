@@ -1,3 +1,5 @@
+import datetime
+
 from collections import namedtuple
 from dateutil.parser import parse as dateutil_parser
 
@@ -6,7 +8,7 @@ from .SyncthingError import SyncthingError
 string_types = (str,)
 
 
-def keys_to_datetime(obj, *keys):
+def keys_to_datetime(obj: dict | None, *keys) -> dict:
     """ Converts all the keys in an object to DateTime instances.
 
         Args:
@@ -45,7 +47,7 @@ def keys_to_datetime(obj, *keys):
     return obj
 
 
-def parse_datetime(s, **kwargs):
+def parse_datetime(s, **kwargs) -> datetime.datetime | None:
     """ Converts a time-string into a valid
     :py:class:`~datetime.datetime.DateTime` object.
 
@@ -55,7 +57,7 @@ def parse_datetime(s, **kwargs):
         ``**kwargs`` is passed directly to :func:`.dateutil_parser`.
 
         Returns:
-            :py:class:`~datetime.datetime.DateTime`
+            :py:class:`~datetime.datetime`
     """
     if not s:
         return None
@@ -67,8 +69,7 @@ def parse_datetime(s, **kwargs):
 
 
 ErrorEvent = namedtuple('ErrorEvent', 'when, message')
-"""tuple[datetime.datetime,str]: used to process error lists more easily, 
-instead of by two-key dictionaries. """
+""" tuple[datetime.datetime,str]: used to process error lists more easily, instead of by two-key dictionaries. """
 
 __all__ = [
     'ErrorEvent',
