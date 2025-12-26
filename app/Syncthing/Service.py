@@ -9,10 +9,10 @@ class Service(BaseAPI):
     prefix = '/rest/svc/'
 
     def device_id(self, id_) -> str:
-        """ Verifies and formats a device ID. Accepts all currently valid
-            formats (52 or 56 characters with or without separators, upper or lower
-            case, with trivial substitutions). Takes one parameter, id, and returns
-            either a valid device ID in modern format or an error.
+        """ Verifies and formats a device ID. Accepts all currently valid formats (52 or 56
+            characters with or without separators, upper or lower case, with trivial
+            substitutions). Takes one parameter, id, and returns either a valid device ID in
+            modern format or an error.
 
             Args:
                 id_ (str)
@@ -25,12 +25,9 @@ class Service(BaseAPI):
         """
         return self.get('deviceid', params={'id': id_}).get('id')
 
-    def language(self) -> dict:
-        """ Returns a list of canonicalized localization codes, as picked up
-            from the Accept-Language header sent by the browser. By default, this
-            API will return a single element that's empty; however, calling:
-            func:`Misc.get` directly with `lang` you can set specific headers to
-            get values back as intended.
+    def lang(self) -> dict:
+        """ Returns a list of canonicalized localization codes, as picked up from the
+            Accept-Language header sent by the browser.
 
             Returns:
                 List[str]
@@ -46,8 +43,8 @@ class Service(BaseAPI):
         return self.get('lang')
 
     def random_string(self, length=32) -> str | None:
-        """ Returns a strong random generated string (alphanumeric) of the
-            specified length.
+        """ Returns a strong random generated string (alphanumeric) of the specified length.
+            Takes the length parameter.
 
             Args:
                 length (int): default ``32``.

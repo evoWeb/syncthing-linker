@@ -76,10 +76,7 @@ class Syncthing(object):
     def events(self, last_seen_id=None, filters=None, **kwargs):
         kw = dict(self.__kwargs)
         kw.update(kwargs)
-        return Events(api_key=self.__api_key,
-                      last_seen_id=last_seen_id,
-                      filters=filters,
-                      **kw)
+        return Events(api_key=self.__api_key, last_seen_id=last_seen_id, filters=filters, **kw)
 
 
 __all__ = [

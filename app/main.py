@@ -40,12 +40,13 @@ if sync_errors:
     for e in sync_errors:
         print(e)
 
-while True:
+#while True:
     # supports long-polling event
-    event_stream = s.events(limit=10)
-    for event in event_stream:
-        print(event)
-        # do something with `event`
-        if event_stream.count > 100:
-            event_stream.stop()
-    time.sleep(10)
+event_stream = s.events(limit=10)
+for event in event_stream:
+    print(event)
+    # do something with `event`
+    if event_stream.count > 100:
+        event_stream.stop()
+#    time.sleep(10)
+event_stream.stop()

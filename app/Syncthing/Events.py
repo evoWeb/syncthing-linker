@@ -54,43 +54,31 @@ class Events(BaseAPI):
         self._count = 0
         self.blocking = True
 
-    @property
-    def count(self) -> int:
-        """ The number of events that have been processed by this event stream.
+    def events(self, using_url, filters=None, limit=None) -> Generator[dict]:
+        """ To receive events, perform an HTTP GET of /rest/events.
 
-            Returns:
-                int
-        """
-        return self._count
+            To filter the event list, in effect, creating a specific subscription for only the
+            desired event types, add a parameter events=EventTypeA,EventTypeB,... where the event
+            types are any of the Event Types. If no filter is specified, all events except
+            LocalChangeDetected and RemoteChangeDetected are included.
 
-    @property
-    def last_seen_id(self) -> int:
-        """ The id of the last seen event.
+            The optional parameter since=<lastSeenID> sets the ID of the last event you’ve already
+            seen. Syncthing returns a JSON encoded array of event objects, starting at the event
+            just after the one with this last seen ID. The default value is 0, which returns all
+            events. There is a limit to the number of events buffered, so if the rate of events is
+            high or the time between polling calls is long, some events might be missed. This can
+            be detected by noting a discontinuity in the event IDs.
 
-            Returns:
-                int
-        """
-        return self._last_seen_id
+            If no new events are produced since <lastSeenID>, the HTTP call blocks and waits for
+            new events to happen before returning. If <lastSeenID> is a future ID, the HTTP call
+            blocks until such ID is reached or timeouts. By default, it times out after 60 seconds
+            returning an empty array. The time-out duration can be customized with the optional
+            parameter timeout=<seconds>.
 
-    def disk_events(self) -> Generator[dict]:
-        """ Blocking generator of disk related events. Each event is represented as a ``dict`` with metadata.
-
-            Returns:
-                generator[dict]
-        """
-        for event in self._events('events/disk', None, self._limit):
-            yield event
-
-    def stop(self) -> None:
-        """ Breaks the while-loop while the generator is polling for event changes.
-
-            Returns:
-                  None
-        """
-        self.blocking = False
-
-    def _events(self, using_url, filters=None, limit=None) -> Generator[dict]:
-        """ A long-polling method that queries Syncthing for events.
+            To receive only a limited number of events, add the limit=<n> parameter with a
+            suitable value for n and only the last n events will be returned. This can be used
+            to catch up with the latest event ID after a disconnection, for example,
+            /rest/events?since=0&limit=1.
 
             Args:
                 using_url (str): REST HTTP endpoint
@@ -146,7 +134,44 @@ class Events(BaseAPI):
                 last: dict = data[-1]
                 self._last_seen_id = last['id']
 
+    def events_disk(self) -> Generator[dict]:
+        """ This convenience endpoint provides the same event stream, but pre-filtered to show
+            only LocalChangeDetected and RemoteChangeDetected event types. The events parameter
+            is not used.
+
+            Returns:
+                generator[dict]
+        """
+        for event in self.events('events/disk', None, self._limit):
+            yield event
+
+    def stop(self) -> None:
+        """ Breaks the while-loop while the generator is polling for event changes.
+
+            Returns:
+                  None
+        """
+        self.blocking = False
+
+    @property
+    def count(self) -> int:
+        """ The number of events that have been processed by this event stream.
+
+            Returns:
+                int
+        """
+        return self._count
+
+    @property
+    def last_seen_id(self) -> int:
+        """ The id of the last seen event.
+
+            Returns:
+                int
+        """
+        return self._last_seen_id
+
     def __iter__(self) -> Generator[dict]:
         """ Helper interface for :obj:`._events` """
-        for event in self._events('events', self._filters, self._limit):
+        for event in self.events('events', self._filters, self._limit):
             yield event
