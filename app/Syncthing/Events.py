@@ -1,10 +1,13 @@
 from requests.exceptions import Timeout
+from typing import Generator
 
 from .BaseAPI import BaseAPI
 from .SyncthingError import SyncthingError
 from .Utilities import string_types
 
+
 NoneType = type(None)
+
 
 class Events(BaseAPI):
     """ HTTP REST endpoints for Event-based calls.
@@ -23,10 +26,17 @@ class Events(BaseAPI):
                    event_stream.stop()
     """
 
-    prefix = '/rest/'
+    prefix: str = '/rest/'
 
-    def __init__(self, api_key, last_seen_id=None, filters=None, limit=None,
-                 *args, **kwargs):
+    def __init__(
+        self,
+        api_key,
+        last_seen_id=None,
+        filters=None,
+        limit=None,
+        *args,
+        **kwargs
+    ):
         if 'timeout' not in kwargs:
             # increase our timeout to account for long polling.
             # this will reduce the number of timed-out connections, which are
@@ -42,7 +52,7 @@ class Events(BaseAPI):
         self.blocking = True
 
     @property
-    def count(self):
+    def count(self) -> int:
         """ The number of events that have been processed by this event stream.
 
             Returns:
@@ -51,7 +61,7 @@ class Events(BaseAPI):
         return self._count
 
     @property
-    def last_seen_id(self):
+    def last_seen_id(self) -> int:
         """ The id of the last seen event.
 
             Returns:
@@ -59,7 +69,7 @@ class Events(BaseAPI):
         """
         return self._last_seen_id
 
-    def disk_events(self):
+    def disk_events(self) -> Generator[dict]:
         """ Blocking generator of disk related events. Each event is represented as a ``dict`` with metadata.
 
             Returns:
@@ -68,7 +78,7 @@ class Events(BaseAPI):
         for event in self._events('events/disk', None, self._limit):
             yield event
 
-    def stop(self):
+    def stop(self) -> None:
         """ Breaks the while-loop while the generator is polling for event changes.
 
             Returns:
@@ -76,7 +86,7 @@ class Events(BaseAPI):
         """
         self.blocking = False
 
-    def _events(self, using_url, filters=None, limit=None):
+    def _events(self, using_url, filters=None, limit=None) -> Generator[dict]:
         """ A long-polling method that queries Syncthing for events.
 
             Args:
@@ -116,10 +126,9 @@ class Events(BaseAPI):
             if filters:
                 params['events'] = ','.join(map(str, filters))
 
-            data = None
             try:
                 data = self.get(using_url, params=params, raw_exceptions=True)
-            except (Timeout, TimeoutError) as e:
+            except (Timeout, TimeoutError):
                 # swallow timeout errors for long polling
                 data = None
             except Exception as e:
@@ -131,9 +140,10 @@ class Events(BaseAPI):
                     self._count += 1
                     yield event
                 # update our last_seen_id to move our event counter forward
-                self._last_seen_id = data[-1]['id']
+                last: dict = data[-1]
+                self._last_seen_id = last['id']
 
-    def __iter__(self):
+    def __iter__(self) -> Generator[dict]:
         """ Helper interface for :obj:`._events` """
         for event in self._events('events', self._filters, self._limit):
             yield event
