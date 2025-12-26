@@ -7,38 +7,38 @@ class Misc(BaseAPI):
 
     def device_id(self, id_):
         """ Verifies and formats a device ID. Accepts all currently valid
-        formats (52 or 56 characters with or without separators, upper or lower
-        case, with trivial substitutions). Takes one parameter, id, and returns
-        either a valid device ID in modern format, or an error.
+            formats (52 or 56 characters with or without separators, upper or lower
+            case, with trivial substitutions). Takes one parameter, id, and returns
+            either a valid device ID in modern format, or an error.
 
-        Args:
-            id_ (str)
+            Args:
+                id_ (str)
 
-        Raises:
-            SyncthingError: when ``id_`` is an invalid length.
+            Raises:
+                SyncthingError: when ``id_`` is an invalid length.
 
-        Returns:
-            str
+            Returns:
+                str
         """
         return self.get('deviceid', params={'id': id_}).get('id')
 
     def language(self):
         """ Returns a list of canonicalized localization codes, as picked up
-        from the Accept-Language header sent by the browser. By default, this
-        API will return a single element that's empty; however calling
-        :func:`Misc.get` directly with `lang` you can set specific headers to
-        get values back as intended.
+            from the Accept-Language header sent by the browser. By default, this
+            API will return a single element that's empty; however calling
+            :func:`Misc.get` directly with `lang` you can set specific headers to
+            get values back as intended.
 
-        Returns:
-            List[str]
+            Returns:
+                List[str]
 
-            >>> s = _syncthing()
-            >>> len(s.misc.language())
-            1
-            >>> s.misc.language()[0]
-            ''
-            >>> s.misc.get('lang', headers={'Accept-Language': 'en-us'})
-            ['en-us']
+                >>> s = initializeSyncthing()
+                >>> len(s.misc.language())
+                1
+                >>> s.misc.language()[0]
+                ''
+                >>> s.misc.get('lang', headers={'Accept-Language': 'en-us'})
+                ['en-us']
         """
         return self.get('lang')
 
@@ -52,7 +52,7 @@ class Misc(BaseAPI):
             Returns:
                 str
 
-            >>> s = _syncthing()
+            >>> s = initializeSyncthing()
             >>> len(s.misc.random_string())
             32
             >>> len(s.misc.random_string(32))
@@ -81,7 +81,7 @@ class Misc(BaseAPI):
             Returns:
                 dict
 
-            >>> s = _syncthing()
+            >>> s = initializeSyncthing()
             >>> report = s.misc.report()
             >>> 'version' in report
             True

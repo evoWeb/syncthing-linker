@@ -34,7 +34,7 @@ class System(BaseAPI):
             Returns:
                 dict
 
-            >>> s = _syncthing().system
+            >>> s = initializeSyncthing().system
             >>> config = s.config()
             >>> config
             ... # doctest: +ELLIPSIS
@@ -49,8 +49,8 @@ class System(BaseAPI):
         return self.get('config')
 
     def set_config(self, config, and_restart=False):
-        """ Post the full contents of the configuration, in the same format as
-        returned by :func:`.config`. The configuration will be saved to disk
+        """ Post the full contents of the configuration in the same format as
+        returned by:func:`.config`. The configuration will be saved to disk,
         and the ``configInSync`` flag set to ``False``. Restart Syncthing to
         activate."""
         assert isinstance(config, dict)
@@ -78,7 +78,7 @@ class System(BaseAPI):
             Returns:
                 dict
 
-            >>> s = _syncthing().system
+            >>> s = initializeSyncthing().system
             >>> connections = s.connections()
             >>> sorted([k for k in connections.keys()])
             ['connections', 'total']
@@ -96,7 +96,7 @@ class System(BaseAPI):
             Returns:
                 dict
 
-            >>> s = _syncthing().system
+            >>> s = initializeSyncthing().system
             >>> debug = s.debug()
             >>> debug
             ... #doctest: +ELLIPSIS
@@ -195,11 +195,11 @@ class System(BaseAPI):
             Returns:
                 None
 
-            >>> s = _syncthing()
+            >>> s = initializeSyncthing()
             >>> s.system.show_error('my error msg')
             >>> s.system.errors()[0]
             ... # doctest: +ELLIPSIS
-            ErrorEvent(when=datetime.datetime(...), message='"my error msg"')
+            ErrorEvent(when=datetime.datetime(...), message='my error msg')
             >>> s.system.clear_errors()
             >>> s.system.errors()
             []

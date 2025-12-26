@@ -5,7 +5,6 @@ import requests
 
 from SyncthingError import SyncthingError
 from Syncthing import string_types
-from Syncthing import reraise
 
 logger = logging.getLogger(__name__)
 DEFAULT_TIMEOUT = 10.0
@@ -87,7 +86,7 @@ class BaseAPI(object):
         except requests.RequestException as e:
             if raw_exceptions:
                 raise e
-            reraise('http request error', e)
+            raise SyncthingError('http request error', e)
 
         else:
             if return_response:

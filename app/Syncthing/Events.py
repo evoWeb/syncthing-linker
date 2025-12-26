@@ -2,13 +2,13 @@ from requests.exceptions import Timeout
 
 import BaseAPI
 
-from Syncthing import reraise
+from SyncthingError import SyncthingError
 from Syncthing import string_types
 
 NoneType = type(None)
 
 class Events(BaseAPI):
-    """ HTTP REST endpoints for Event based calls.
+    """ HTTP REST endpoints for Event-based calls.
 
         Syncthing provides a simple long polling interface for exposing events
         from the core utility towards a GUI.
@@ -61,8 +61,7 @@ class Events(BaseAPI):
         return self._last_seen_id
 
     def disk_events(self):
-        """ Blocking generator of disk related events. Each event is
-        represented as a ``dict`` with metadata.
+        """ Blocking generator of disk related events. Each event is represented as a ``dict`` with metadata.
 
             Returns:
                 generator[dict]
@@ -71,8 +70,7 @@ class Events(BaseAPI):
             yield event
 
     def stop(self):
-        """ Breaks the while-loop while the generator is polling for event
-            changes.
+        """ Breaks the while-loop while the generator is polling for event changes.
 
             Returns:
                   None
@@ -80,7 +78,7 @@ class Events(BaseAPI):
         self.blocking = False
 
     def _events(self, using_url, filters=None, limit=None):
-        """ A long-polling method that queries Syncthing for events..
+        """ A long-polling method that queries Syncthing for events.
 
             Args:
                 using_url (str): REST HTTP endpoint
@@ -126,7 +124,7 @@ class Events(BaseAPI):
                 # swallow timeout errors for long polling
                 data = None
             except Exception as e:
-                reraise('', e)
+                raise SyncthingError('', e)
 
             if data:
                 for event in data:

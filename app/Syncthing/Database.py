@@ -18,7 +18,7 @@ class Database(BaseAPI):
             Args:
                 folder (str): The root folder to traverse.
                 levels (int): How deep within the tree we want to dwell down.
-                    (0 based, defaults to unlimited depth)
+                    (0-based, defaults to unlimited depth)
                 prefix (str): Defines a prefix within the tree where to start
                     building the structure.
 
@@ -32,14 +32,13 @@ class Database(BaseAPI):
                                           'prefix': prefix})
 
     def completion(self, device, folder):
-        """ Returns the completion percentage (0 to 100) for a given device
-            and folder.
+        """ Returns the completion percentage (0 to 100) for a given device and folder.
 
             Args:
                 device (str): The Syncthing device the folder is syncing to.
                 folder (str): The folder that is being synced.
 
-            Returs:
+            Returns:
                 int
         """
         return self.get(
@@ -48,8 +47,7 @@ class Database(BaseAPI):
         ).get('completion', None)
 
     def file(self, folder, file_):
-        """ Returns most data available about a given file, including version
-            and availability.
+        """ Returns most data available about a given file, including version and availability.
 
             Args:
                 folder (str):
@@ -62,16 +60,16 @@ class Database(BaseAPI):
                                         'file': file_})
 
     def ignores(self, folder):
-        """ Returns the content of the ``.stignore`` as the ignore field. A
-        second field, expanded, provides a list of strings which represent
-        globbing patterns described by gobwas/glob (based on standard
-        wildcards) that match the patterns in ``.stignore`` and all the
-        includes.
+        """ Returns the content of the ``.stignore`` as the ignored field. A
+            second field, expanded, provides a list of strings which represent
+            globbing patterns described by gobwas/glob (based on standard
+            wildcards) that match the patterns in ``.stignore`` and all the
+            includes.
 
-        If appropriate these globs are prepended by the following modifiers:
-        ``!`` to negate the glob, ``(?i)`` to do case insensitive matching and
-        ``(?d)`` to enable removing of ignored files in an otherwise empty
-        directory.
+            If appropriate, these globs are prepended by the following modifiers:
+            ``!`` to negate the glob, ``(?i)`` to do case-insensitive matching and
+            ``(?d)`` to enable removing of ignored files in an otherwise empty
+            directory.
 
             Args:
                 folder
@@ -97,14 +95,13 @@ class Database(BaseAPI):
         return self.post('ignores', params={'folder': folder}, data=data)
 
     def need(self, folder, page=None, perpage=None):
-        """ Returns lists of files which are needed by this device in order
-        for it to become in sync.
+        """ Returns lists of files which are needed by this device in order for it to become in sync.
 
             Args:
                 folder (str):
-                page (int): If defined applies pagination accross the
+                page (int): If defined, applies pagination across the
                     collection of results.
-                perpage (int): If defined applies pagination across the
+                perpage (int): If defined, applies pagination across the
                     collection of results.
 
             Returns:
@@ -141,16 +138,15 @@ class Database(BaseAPI):
                                   'file': file_})
 
     def scan(self, folder, sub=None, next_=None):
-        """ Request immediate rescan of a folder, or a specific path within a
-        folder.
+        """ Request immediate rescan of a folder, or a specific path within a folder.
 
             Args:
                 folder (str): Folder ID.
-                sub (str): Path relative to the folder root. If sub is omitted
+                sub (str): Path relative to the folder root. If sub is omitted,
                     the entire folder is scanned for changes, otherwise only
                     the given path children are scanned.
                 next_ (int): Delays Syncthing's automated rescan interval for
-                    a given amount of seconds.
+                    a given number of seconds.
 
             Returns:
                 str
