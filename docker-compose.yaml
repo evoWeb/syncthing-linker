@@ -30,12 +30,8 @@ volumes:
 
 services:
   linker:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    #image: python:3-trixie
+    image: evoweb/syncthing-linker:${TAG:-latest}
     volumes:
-      - app:/usr/src/app
       - config:/config
       - source:/source
       - destination:/destination
@@ -45,7 +41,30 @@ services:
       TZ: Europe/Berlin
       SYNCTHING_HOST: "${SYNCTHING_HOST:-syncthing}"
       SYNCTHING_PORT: "${SYNCTHING_PORT:-8384}"
-      API_KEY: "${API_KEY}"
-    restart: unless-stopped
+      SYNCTHING_API_KEY: "${SYNCTHING_API_KEY}"
+    restart: always
+    networks:
+      - syncthing
+
+  linker-development:
+    image: evoweb/syncthing-linker:${TAG:-latest}
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: sleep infinity
+    volumes:
+      - app:/usr/src/app
+
+      - config:/config
+      - source:/source
+      - destination:/destination
+    environment:
+      PUID: 1000
+      PGID: 1000
+      TZ: Europe/Berlin
+      SYNCTHING_HOST: "${SYNCTHING_HOST:-syncthing}"
+      SYNCTHING_PORT: "${SYNCTHING_PORT:-8384}"
+      SYNCTHING_API_KEY: "${SYNCTHING_API_KEY}"
+    restart: no
     networks:
       - syncthing
