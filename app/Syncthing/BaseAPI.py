@@ -14,14 +14,18 @@ class BaseAPI(object):
 
     prefix = ''
 
-    def __init__(self, api_key, host='localhost', port=8384,
-                 timeout=DEFAULT_TIMEOUT, is_https=False, ssl_cert_file=None):
-
+    def __init__(
+            self,
+            api_key,
+            host='localhost',
+            port=8384,
+            timeout=DEFAULT_TIMEOUT,
+            is_https=False,
+            ssl_cert_file=None
+    ):
         if ssl_cert_file:
             if not os.path.exists(ssl_cert_file):
-                raise SyncthingError(
-                    'ssl_cert_file does not exist at location, %s' %
-                    ssl_cert_file)
+                raise SyncthingError('ssl_cert_file does not exist at location, %s' % ssl_cert_file)
 
         self.api_key = api_key
         self.host = host
@@ -33,31 +37,49 @@ class BaseAPI(object):
         self._headers = {
             'X-API-Key': api_key
         }
-        self.url = '{proto}://{host}:{port}'.format(
-            proto='https' if is_https else 'http', host=host, port=port)
+        self.url = '{proto}://{host}:{port}'.format(proto='https' if is_https else 'http', host=host, port=port)
         self._base_url = self.url + '{endpoint}'
 
-    def get(self, endpoint, data=None, headers=None, params=None,
-            return_response=False, raw_exceptions=False):
+    def get(
+            self,
+            endpoint,
+            data=None,
+            headers=None,
+            params=None,
+            return_response=False,
+            raw_exceptions=False
+    ) -> requests.Response | str | dict:
         endpoint = self.prefix + endpoint
-        return self._request('GET', endpoint, data, headers, params,
-                             return_response, raw_exceptions)
+        return self._request('GET', endpoint, data, headers, params, return_response, raw_exceptions)
 
-    def post(self, endpoint, data=None, headers=None, params=None,
-             return_response=False, raw_exceptions=False):
+    def post(
+            self,
+            endpoint,
+            data=None,
+            headers=None,
+            params=None,
+            return_response=False,
+            raw_exceptions=False
+    ) -> requests.Response | str | dict:
         endpoint = self.prefix + endpoint
-        return self._request('POST', endpoint, data, headers, params,
-                             return_response, raw_exceptions)
+        return self._request('POST', endpoint, data, headers, params, return_response, raw_exceptions)
 
-    def _request(self, method, endpoint, data=None, headers=None, params=None,
-                    return_response=False, raw_exceptions=False):
+    def _request(
+            self,
+            method,
+            endpoint,
+            data=None,
+            headers=None,
+            params=None,
+            return_response=False,
+            raw_exceptions=False
+    ) -> requests.Response | str | dict:
         method = method.upper()
 
         endpoint = self._base_url.format(endpoint=endpoint)
 
         if method not in ('GET', 'POST', 'PUT', 'DELETE'):
-            raise SyncthingError(
-                'unsupported http verb requested, %s' % method)
+            raise SyncthingError('unsupported http verb requested, %s' % method)
 
         if data is None:
             data = {}
@@ -70,7 +92,7 @@ class BaseAPI(object):
         headers.update(self._headers)
 
         try:
-            resp = requests.request(
+            response = requests.request(
                 method,
                 endpoint,
                 data=json.dumps(data),
@@ -81,7 +103,7 @@ class BaseAPI(object):
             )
 
             if not return_response:
-                resp.raise_for_status()
+                response.raise_for_status()
 
         except requests.RequestException as e:
             if raw_exceptions:
@@ -90,22 +112,18 @@ class BaseAPI(object):
 
         else:
             if return_response:
-                return resp
+                return response
 
-            if resp.status_code != requests.codes.ok:
-                logger.error('%d %s (%s): %s', resp.status_code, resp.reason,
-                                resp.url, resp.text)
-                return resp
+            if response.status_code != requests.codes.ok:
+                logger.error('%d %s (%s): %s', response.status_code, response.reason, response.url, response.text)
+                return response
 
-            if 'json' in resp.headers.get('Content-Type', 'text/plain')\
-                    .lower():
-                json_data = resp.json()
-
+            if 'json' in response.headers.get('Content-Type', 'text/plain').lower():
+                json_data = response.json()
             else:
-                content = resp.content.decode('utf-8')
+                content = response.content.decode('utf-8')
                 if content and content[0] == '{' and content[-1] == '}':
                     json_data = json.loads(content)
-
                 else:
                     return content
 
