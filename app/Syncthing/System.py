@@ -8,11 +8,14 @@ from .Utilities import parse_datetime
 from .Utilities import string_types
 
 class System(BaseAPI):
-    """ HTTP REST endpoint for System calls."""
+    """ HTTP REST endpoint for System calls.
+
+        Implements endpoints of https://docs.syncthing.net/dev/rest.html#system-endpoints
+    """
 
     prefix = '/rest/system/'
 
-    def browse(self, path=None):
+    def browse(self, path=None) -> list[str]:
         """ Returns a list of directories matching the path given.
 
         Args:
@@ -27,13 +30,14 @@ class System(BaseAPI):
             params = {'current': path}
         return self.get('browse', params=params)
 
+    # DEPRECATED
     def config(self):
         """ Returns the current configuration.
 
             Returns:
                 dict
 
-            >>> s = initializeSyncthing().system
+            >>> s = syncthing_factory().system
             >>> config = s.config()
             >>> config
             ... # doctest: +ELLIPSIS
@@ -47,6 +51,7 @@ class System(BaseAPI):
         """
         return self.get('config')
 
+    # DEPRECATED
     def set_config(self, config, and_restart=False):
         """ Post the full contents of the configuration in the same format as
         returned by:func:`.config`. The configuration will be saved to disk,
@@ -57,6 +62,7 @@ class System(BaseAPI):
         if and_restart:
             self.restart()
 
+    # DEPRECATED
     def config_insync(self):
         """ Returns whether the config is in sync, i.e. whether the running
             configuration is the same as that on disk.
@@ -77,7 +83,7 @@ class System(BaseAPI):
             Returns:
                 dict
 
-            >>> s = initializeSyncthing().system
+            >>> s = syncthing_factory().system
             >>> connections = s.connections()
             >>> sorted([k for k in connections.keys()])
             ['connections', 'total']
@@ -95,7 +101,7 @@ class System(BaseAPI):
             Returns:
                 dict
 
-            >>> s = initializeSyncthing().system
+            >>> s = syncthing_factory().system
             >>> debug = s.debug()
             >>> debug
             ... #doctest: +ELLIPSIS
@@ -194,7 +200,7 @@ class System(BaseAPI):
             Returns:
                 None
 
-            >>> s = initializeSyncthing()
+            >>> s = syncthing_factory()
             >>> s.system.show_error('my error msg')
             >>> s.system.errors()[0]
             ... # doctest: +ELLIPSIS

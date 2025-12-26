@@ -1,4 +1,5 @@
 from requests.exceptions import Timeout
+from urllib3.exceptions import TimeoutError
 from typing import Generator
 
 from .BaseAPI import BaseAPI
@@ -11,6 +12,8 @@ NoneType = type(None)
 
 class Events(BaseAPI):
     """ HTTP REST endpoints for Event-based calls.
+
+        Implements endpoints of https://docs.syncthing.net/dev/rest.html#event-endpoints
 
         Syncthing provides a simple long polling interface for exposing events
         from the core utility towards a GUI.

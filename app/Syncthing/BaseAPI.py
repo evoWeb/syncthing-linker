@@ -48,7 +48,7 @@ class BaseAPI(object):
         params=None,
         return_response=False,
         raw_exceptions=False
-    ) -> requests.Response | str | dict:
+    ) -> requests.Response | int | str | dict | list:
         endpoint = self.prefix + endpoint
         return self._request('GET', endpoint, data, headers, params, return_response, raw_exceptions)
 
@@ -60,7 +60,7 @@ class BaseAPI(object):
         params=None,
         return_response=False,
         raw_exceptions=False
-    ) -> requests.Response | str | dict:
+    ) -> requests.Response | int | str | dict | list:
         endpoint = self.prefix + endpoint
         return self._request('POST', endpoint, data, headers, params, return_response, raw_exceptions)
 
@@ -73,7 +73,7 @@ class BaseAPI(object):
         params=None,
         return_response=False,
         raw_exceptions=False
-    ) -> requests.Response | str | dict:
+    ) -> requests.Response | int | str | dict | list:
         method = method.upper()
 
         endpoint = self._base_url.format(endpoint=endpoint)

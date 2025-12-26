@@ -1,7 +1,10 @@
 from .BaseAPI import BaseAPI
 
 class Service(BaseAPI):
-    """ HTTP REST endpoint for Miscelaneous calls."""
+    """ HTTP REST endpoint for Misc Services.
+
+        Implements endpoints of https://docs.syncthing.net/dev/rest.html#misc-services-endpoints
+    """
 
     prefix = '/rest/svc/'
 

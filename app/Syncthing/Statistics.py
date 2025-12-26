@@ -1,11 +1,14 @@
 from .BaseAPI import BaseAPI
 
 class Statistics(BaseAPI):
-    """ HTTP REST endpoint for Statistic calls."""
+    """ HTTP REST endpoint for Statistic calls.
+
+        Implements endpoints of https://docs.syncthing.net/dev/rest.html#statistics-endpoints
+    """
 
     prefix = '/rest/stats/'
 
-    def device(self):
+    def device(self) -> dict:
         """ Returns general statistics about devices.
 
             Currently, it only contains the time the device was last seen.
@@ -15,7 +18,7 @@ class Statistics(BaseAPI):
         """
         return self.get('device')
 
-    def folder(self):
+    def folder(self) -> dict:
         """ Returns general statistics about folders.
 
             Currently, it contains the last scan time and the last synced file.

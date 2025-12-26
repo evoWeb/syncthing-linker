@@ -3,7 +3,10 @@ from .BaseAPI import BaseAPI
 from .Utilities import string_types
 
 class Database(BaseAPI):
-    """ HTTP REST endpoint for Database calls."""
+    """ HTTP REST endpoint for Database calls.
+
+        Implements endpoints of https://docs.syncthing.net/dev/rest.html#database-endpoints
+    """
 
     prefix = '/rest/db/'
 
