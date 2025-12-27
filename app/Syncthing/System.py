@@ -1,11 +1,16 @@
 import requests
 import warnings
 
+from collections import namedtuple
+
 from .BaseAPI import BaseAPI
-from .Utilities import ErrorEvent
 from .Utilities import keys_to_datetime
 from .Utilities import parse_datetime
-from .Utilities import string_types
+
+
+ErrorEvent = namedtuple('ErrorEvent', 'when, message')
+""" tuple[datetime.datetime,str]: used to process error lists more easily, instead of by two-key dictionaries. """
+
 
 class System(BaseAPI):
     """ HTTP REST endpoint for System calls.
@@ -15,7 +20,7 @@ class System(BaseAPI):
 
     prefix = '/rest/system/'
 
-    def browse(self, path: str=None) -> list[str]:
+    def browse(self, path: str | None = None) -> list[str]:
         """ Returns a list of directories matching the path given by the optional parameter current.
             The path can use patterns as described in Go’s filepath package. A ‘*’ will always be
             appended to the given path (e.g. /tmp/ matches all its subdirectories). If the option
@@ -29,7 +34,7 @@ class System(BaseAPI):
         """
         params = None
         if path:
-            assert isinstance(path, string_types)
+            assert isinstance(path, str)
             params = {'current': path}
         return self.get('browse', params=params)
 
@@ -58,7 +63,7 @@ class System(BaseAPI):
         return self.get('config')
 
     # DEPRECATED
-    def set_config(self, config, and_restart=False) -> None:
+    def set_config(self, config: dict, and_restart = False) -> None:
         """ Deprecated since the version v1.12.0: This endpoint still works as before but is
             deprecated. Use Config Endpoints instead.
 
@@ -120,7 +125,7 @@ class System(BaseAPI):
         """
         return self.get('discovery')
 
-    def add_discovery(self, device, address) -> None:
+    def add_discovery(self, device: str, address: str) -> None:
         """ Post with the query parameters device and addr to add entries to the discovery cache.
 
             Args:
@@ -180,7 +185,7 @@ class System(BaseAPI):
             >>> s.system.errors()
             []
         """
-        assert isinstance(message, string_types)
+        assert isinstance(message, str)
         self.post('error', data=message)
 
     def log(self) -> dict:
@@ -234,11 +239,11 @@ class System(BaseAPI):
             Returns:
                 dict: with keys ``success`` and ``error``.
         """
-        resp = self.post('pause', params={'device': device}, return_response=True)
-        error = resp.text
+        response = self.post('pause', params={'device': device}, return_response=True)
+        error = response.text
         if not error:
             error = None
-        return {'success': resp.status_code == requests.codes.ok, 'error': error}
+        return {'success': response.status_code == requests.codes.ok, 'error': error}
 
     def ping(self, method: str = 'GET') -> dict:
         """ Returns a {"ping": "pong"} object.
@@ -287,7 +292,7 @@ class System(BaseAPI):
         """
         self.post('restart')
 
-    def resume(self, device: str = None) -> dict:
+    def resume(self, device: str | None = None) -> dict:
         """ Resume the given device or all devices.
 
             Takes the optional parameter device (device ID). When omitted, resumes all devices.

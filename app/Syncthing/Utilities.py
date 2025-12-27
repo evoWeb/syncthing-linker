@@ -1,11 +1,8 @@
 import datetime
 
-from collections import namedtuple
 from dateutil.parser import parse as dateutil_parser
 
 from .SyncthingError import SyncthingError
-
-string_types = (str,)
 
 
 def keys_to_datetime(obj: dict | None, *keys) -> dict:
@@ -41,39 +38,33 @@ def keys_to_datetime(obj: dict | None, *keys) -> dict:
         if k not in obj:
             continue
         v = obj[k]
-        if not isinstance(v, string_types):
+        if not isinstance(v, str):
             continue
         obj[k] = parse_datetime(v)
     return obj
 
 
-def parse_datetime(s, **kwargs) -> datetime.datetime | None:
-    """ Converts a time-string into a valid
-    :py:class:`~datetime.datetime.DateTime` object.
+def parse_datetime(date_string: str | None, **kwargs) -> datetime.datetime | None:
+    """ Converts a time-string into a valid :py:class:`~datetime.datetime.DateTime` object.
 
         Args:
-            s (str): string to be formatted.
+            date_string (str): string to be formatted.
 
         ``**kwargs`` is passed directly to :func:`.dateutil_parser`.
 
         Returns:
             :py:class:`~datetime.datetime`
     """
-    if not s:
+    if not date_string:
         return None
     try:
-        ret = dateutil_parser(s, **kwargs)
+        ret = dateutil_parser(date_string, **kwargs)
     except (OverflowError, TypeError, ValueError) as e:
-        raise SyncthingError('datetime parsing error from %s' % s, e)
+        raise SyncthingError('datetime parsing error from %s' % date_string, e)
     return ret
 
 
-ErrorEvent = namedtuple('ErrorEvent', 'when, message')
-""" tuple[datetime.datetime,str]: used to process error lists more easily, instead of by two-key dictionaries. """
-
 __all__ = [
-    'ErrorEvent',
     'keys_to_datetime',
-    'parse_datetime',
-    'string_types'
+    'parse_datetime'
 ]

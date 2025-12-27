@@ -4,10 +4,8 @@ import logging
 import requests
 
 from .SyncthingError import SyncthingError
-from .Utilities import string_types
 
-logger = logging.getLogger(__name__)
-DEFAULT_TIMEOUT = 10.0
+DEFAULT_TIMEOUT = 10
 
 class BaseAPI(object):
     """ Placeholder for HTTP REST API URL prefix. """
@@ -16,12 +14,12 @@ class BaseAPI(object):
 
     def __init__(
         self,
-        api_key,
-        host='localhost',
-        port=8384,
-        timeout=DEFAULT_TIMEOUT,
-        is_https=False,
-        ssl_cert_file=None
+        api_key: str,
+        host: str = 'localhost',
+        port: int = 8384,
+        timeout: int = DEFAULT_TIMEOUT,
+        is_https: bool = False,
+        ssl_cert_file: str | None = None
     ):
         if ssl_cert_file:
             if not os.path.exists(ssl_cert_file):
@@ -39,40 +37,65 @@ class BaseAPI(object):
         }
         self.url = '{proto}://{host}:{port}'.format(proto='https' if is_https else 'http', host=host, port=port)
         self._base_url = self.url + '{endpoint}'
+        self.logger = logging.getLogger(__name__)
 
     def get(
         self,
-        endpoint,
-        data=None,
-        headers=None,
-        params=None,
-        return_response=False,
-        raw_exceptions=False
+        endpoint: str,
+        data: dict | str | None = None,
+        headers: dict | None = None,
+        params: dict | None = None,
+        return_response: bool = False,
+        raw_exceptions: bool = False
     ) -> requests.Response | int | str | dict | list:
         endpoint = self.prefix + endpoint
         return self._request('GET', endpoint, data, headers, params, return_response, raw_exceptions)
 
     def post(
         self,
-        endpoint,
-        data=None,
-        headers=None,
-        params=None,
-        return_response=False,
-        raw_exceptions=False
+        endpoint: str,
+        data: dict | str | None = None,
+        headers: dict | None = None,
+        params: dict | None = None,
+        return_response: bool = False,
+        raw_exceptions: bool = False
     ) -> requests.Response | int | str | dict | list:
         endpoint = self.prefix + endpoint
         return self._request('POST', endpoint, data, headers, params, return_response, raw_exceptions)
 
+    def put(
+        self,
+        endpoint: str,
+        data: dict | str | None = None,
+        headers: dict | None = None,
+        params: dict | None = None,
+        return_response: bool = False,
+        raw_exceptions: bool = False
+    ) -> requests.Response | int | str | dict | list:
+        endpoint = self.prefix + endpoint
+        return self._request('PUT', endpoint, data, headers, params, return_response, raw_exceptions)
+
+    def delete(
+        self,
+        endpoint: str,
+        data: dict | str | None = None,
+        headers: dict | None = None,
+        params: dict | None = None,
+        return_response: bool = False,
+        raw_exceptions: bool = False
+    ) -> requests.Response | int | str | dict | list:
+        endpoint = self.prefix + endpoint
+        return self._request('DELETE', endpoint, data, headers, params, return_response, raw_exceptions)
+
     def _request(
         self,
-        method,
-        endpoint,
-        data=None,
-        headers=None,
-        params=None,
-        return_response=False,
-        raw_exceptions=False
+        method: str,
+        endpoint: str,
+        data: dict | str | None = None,
+        headers: dict | None = None,
+        params: dict | None = None,
+        return_response: bool = False,
+        raw_exceptions: bool = False
     ) -> requests.Response | int | str | dict | list:
         method = method.upper()
 
@@ -83,7 +106,7 @@ class BaseAPI(object):
 
         if data is None:
             data = {}
-        assert isinstance(data, string_types) or isinstance(data, dict)
+        assert isinstance(data, str) or isinstance(data, dict)
 
         if headers is None:
             headers = {}
@@ -115,7 +138,7 @@ class BaseAPI(object):
                 return response
 
             if response.status_code != requests.codes.ok:
-                logger.error('%d %s (%s): %s', response.status_code, response.reason, response.url, response.text)
+                self.logger.error('%d %s (%s): %s', response.status_code, response.reason, response.url, response.text)
                 return response
 
             if 'json' in response.headers.get('Content-Type', 'text/plain').lower():

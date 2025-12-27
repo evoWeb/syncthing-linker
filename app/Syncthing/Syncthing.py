@@ -6,14 +6,16 @@
 
 import os
 
+from .BaseAPI import DEFAULT_TIMEOUT
+from .Cluster import Cluster
+from .Config import Config
 from .Database import Database
+from .Debug import Debug
 from .Events import Events
+from .Noauth import Noauth
 from .Service import Service
 from .Statistics import Statistics
 from .System import System
-
-
-DEFAULT_TIMEOUT = 10.0
 
 
 def syncthing_factory():
@@ -22,11 +24,13 @@ def syncthing_factory():
     port = os.getenv('SYNCTHING_PORT', 8384)
     is_https = bool(int(os.getenv('SYNCTHING_HTTPS', '0')))
     ssk_cert_file = os.getenv('SYNCTHING_CERT_FILE')
-    return Syncthing(key, host, port, 10.0, is_https, ssk_cert_file)
+    return Syncthing(key, host, port, 10, is_https, ssk_cert_file)
 
 
 class Syncthing(object):
     """ Default interface for interacting with Syncthing server instance.
+
+        Wrapping all endpoints described in https://docs.syncthing.net/dev/rest.html
 
         Args:
             api_key (str)
@@ -37,30 +41,41 @@ class Syncthing(object):
             ssl_cert_file (str)
 
         Attributes:
-            system: instance of :class:`System`.
-            database: instance of :class:`Database`.
-            stats: instance of :class:`Statistics`.
-            service: instance of :class:`Service`.
-
-        Note:
-            - attribute :attr:`.db` is an alias of :attr:`.database`
-            - attribute :attr:`.sys` is an alias of :attr:`.system`
+            cluster: instance of `Cluster`.
+            config: instance of `Config`.
+            database: instance of `Database`.
+            debug: instance of `Debug`.
+            noauth: instance of `Noauth`.
+            system: instance of `System`.
+            stats: instance of `Statistics`.
+            service: instance of `Service`.
     """
 
-    def __init__(self, api_key, host='localhost', port=8384,
-                 timeout=DEFAULT_TIMEOUT, is_https=False, ssl_cert_file=None):
+    _api_key: str
+    _host: str
+    _port: int
+    _timeout: int
+    _is_https: bool
+    _ssl_cert_file: str
+    _kwargs: dict
 
-        # save this for deferred api sub instances
-        self.__api_key = api_key
+    def __init__(
+        self,
+        api_key: str,
+        host: str = 'localhost',
+        port: int = 8384,
+        timeout: int = DEFAULT_TIMEOUT,
+        is_https: bool = False,
+        ssl_cert_file: str | None = None
+    ):
+        self._api_key = api_key
+        self._host = host
+        self._port = port
+        self._timeout = timeout
+        self._is_https = is_https
+        self._ssl_cert_file = ssl_cert_file
 
-        self.api_key = api_key
-        self.host = host
-        self.port = port
-        self.timeout = timeout
-        self.is_https = is_https
-        self.ssl_cert_file = ssl_cert_file
-
-        self.__kwargs = kwargs = {
+        self._kwargs = kwargs = {
             'host': host,
             'port': port,
             'timeout': timeout,
@@ -68,15 +83,19 @@ class Syncthing(object):
             'ssl_cert_file': ssl_cert_file
         }
 
-        self.system = self.sys = System(api_key, **kwargs)
-        self.database = self.db = Database(api_key, **kwargs)
-        self.stats = Statistics(api_key, **kwargs)
+        self.cluster = Cluster(api_key, **kwargs)
+        self.config = Config(api_key, **kwargs)
+        self.database = Database(api_key, **kwargs)
+        self.debug = Debug(api_key, **kwargs)
+        self.noauth = Noauth(api_key, **kwargs)
         self.service = Service(api_key, **kwargs)
+        self.stats = Statistics(api_key, **kwargs)
+        self.system = System(api_key, **kwargs)
 
-    def events(self, last_seen_id=None, filters=None, **kwargs):
-        kw = dict(self.__kwargs)
+    def events(self, last_seen_id: int | None = None, filters: list[str] | None = None, **kwargs):
+        kw = dict(self._kwargs)
         kw.update(kwargs)
-        return Events(api_key=self.__api_key, last_seen_id=last_seen_id, filters=filters, **kw)
+        return Events(api_key=self._api_key, last_seen_id=last_seen_id, filters=filters, **kw)
 
 
 __all__ = [

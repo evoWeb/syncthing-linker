@@ -8,24 +8,24 @@ class Service(BaseAPI):
 
     prefix = '/rest/svc/'
 
-    def device_id(self, id_) -> str:
+    def deviceid(self, device_id: str) -> str:
         """ Verifies and formats a device ID. Accepts all currently valid formats (52 or 56
             characters with or without separators, upper or lower case, with trivial
             substitutions). Takes one parameter, id, and returns either a valid device ID in
             modern format or an error.
 
             Args:
-                id_ (str)
+                device_id (str)
 
             Raises:
-                SyncthingError: when ``id_`` is an invalid length.
+                SyncthingError: when ``device_id`` is an invalid length.
 
             Returns:
                 str
         """
-        return self.get('deviceid', params={'id': id_}).get('id')
+        return self.get('deviceid', params={'id': device_id}).get('id')
 
-    def lang(self) -> dict:
+    def lang(self, accept_language: str | None = None) -> list[str]:
         """ Returns a list of canonicalized localization codes, as picked up from the
             Accept-Language header sent by the browser.
 
@@ -33,16 +33,22 @@ class Service(BaseAPI):
                 List[str]
 
                 >>> s = syncthing_factory()
-                >>> len(s.misc.language())
+                >>> len(s.service.lang())
                 1
-                >>> s.misc.language()[0]
+                >>> s.service.lang()[0]
                 ''
-                >>> s.misc.get('lang', headers={'Accept-Language': 'en-us'})
+                >>> s.service.lang('en-us')
+                ['en-us']
+                >>> s.service.get('lang', headers={'Accept-Language': 'en-us'})
                 ['en-us']
         """
-        return self.get('lang')
+        if accept_language:
+            result = self.get('lang', headers={'Accept-Language': accept_language})
+        else:
+            result = self.get('lang')
+        return result
 
-    def random_string(self, length=32) -> str | None:
+    def random_string(self, length: int = 32) -> str:
         """ Returns a strong random generated string (alphanumeric) of the specified length.
             Takes the length parameter.
 
@@ -53,15 +59,15 @@ class Service(BaseAPI):
                 str
 
             >>> s = syncthing_factory()
-            >>> len(s.misc.random_string())
+            >>> len(s.service.random_string())
             32
-            >>> len(s.misc.random_string(32))
+            >>> len(s.service.random_string(32))
             32
-            >>> len(s.misc.random_string(1))
+            >>> len(s.service.random_string(1))
             1
-            >>> len(s.misc.random_string(0))
+            >>> len(s.service.random_string(0))
             32
-            >>> len(s.misc.random_string(None))
+            >>> len(s.service.random_string(None))
             32
             >>> import string
             >>> all_letters = string.ascii_letters + string.digits
@@ -70,7 +76,7 @@ class Service(BaseAPI):
             >>> all([c in all_letters for c in s.misc.random_string(1024)])
             True
         """
-        return self.get('random/string', params={'length': length}).get('random', None)
+        return self.get('random/string', params={'length': length}).get('random', '')
 
     def report(self) -> dict:
         """ Returns the data sent in the anonymous usage report.
@@ -79,7 +85,7 @@ class Service(BaseAPI):
                 dict
 
             >>> s = syncthing_factory()
-            >>> report = s.misc.report()
+            >>> report = s.service.report()
             >>> 'version' in report
             True
             >>> 'longVersion' in report

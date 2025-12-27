@@ -4,10 +4,6 @@ from typing import Generator
 
 from .BaseAPI import BaseAPI
 from .SyncthingError import SyncthingError
-from .Utilities import string_types
-
-
-NoneType = type(None)
 
 
 class Events(BaseAPI):
@@ -33,10 +29,10 @@ class Events(BaseAPI):
 
     def __init__(
         self,
-        api_key,
-        last_seen_id=None,
-        filters=None,
-        limit=None,
+        api_key: str,
+        last_seen_id: int = None,
+        filters: list[str] = None,
+        limit: int = None,
         *args,
         **kwargs
     ):
@@ -54,7 +50,12 @@ class Events(BaseAPI):
         self._count = 0
         self.blocking = True
 
-    def events(self, using_url, filters=None, limit=None) -> Generator[dict]:
+    def events(
+        self,
+        using_url: str,
+        filters: list[str] | None = None,
+        limit: int | None = None
+    ) -> Generator[dict]:
         """ To receive events, perform an HTTP GET of /rest/events.
 
             To filter the event list, in effect, creating a specific subscription for only the
@@ -92,16 +93,12 @@ class Events(BaseAPI):
         """
 
         # coerce
-        if not isinstance(limit, (int, NoneType)):
+        if not isinstance(limit, (int, None)):
             limit = None
 
         # coerce
         if filters is None:
             filters = []
-
-        # format our list into the correct expectation of string with commas
-        if isinstance(filters, string_types):
-            filters = filters.split(',')
 
         # reset the state if the loop was broken with `stop`
         if not self.blocking:
@@ -109,13 +106,13 @@ class Events(BaseAPI):
 
         # block/long-poll for updates to the events api
         while self.blocking:
-            params = {
+            params: dict[str, str | int] = {
                 'since': self._last_seen_id,
                 'limit': limit,
             }
 
             if filters:
-                params['events'] = ','.join(map(str, filters))
+                params['events'] = ','.join(filters)
 
             try:
                 data = self.get(using_url, params=params, raw_exceptions=True)

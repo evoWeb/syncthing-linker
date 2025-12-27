@@ -1,7 +1,5 @@
 from .BaseAPI import BaseAPI
 
-from .Utilities import string_types
-
 class Database(BaseAPI):
     """ HTTP REST endpoint for Database calls.
 
@@ -10,7 +8,7 @@ class Database(BaseAPI):
 
     prefix = '/rest/db/'
 
-    def browse(self, folder, levels=None, prefix=None) -> dict:
+    def browse(self, folder: str, levels: int = None, prefix: str = None) -> dict:
         """ Returns the directory tree of the global model. Directories are always JSON objects
             (map/dictionary), and files are always arrays of modification time and size. The first
             integer is the files modification time, and the second integer is the file size.
@@ -31,10 +29,10 @@ class Database(BaseAPI):
                 dict
         """
         assert isinstance(levels, int) or levels is None
-        assert isinstance(prefix, string_types) or prefix is None
+        assert isinstance(prefix, str) or prefix is None
         return self.get('browse', params={'folder': folder, 'levels': levels, 'prefix': prefix})
 
-    def completion(self, device, folder) -> int:
+    def completion(self, device: str, folder: str) -> int:
         """ Returns the completion percentage (0 to 100) and byte / item counts. Takes optional
             device and folder parameters:
 
@@ -56,19 +54,19 @@ class Database(BaseAPI):
         """
         return self.get('completion', params={'folder': folder, 'device': device}).get('completion', None)
 
-    def file(self, folder, file_) -> dict:
+    def file(self, folder: str, file: str) -> dict:
         """ Returns most data about a given file, including version and availability.
 
             Args:
                 folder (str):
-                file_ (str):
+                file (str):
 
             Returns:
                 dict
         """
-        return self.get('file', params={'folder': folder, 'file': file_})
+        return self.get('file', params={'folder': folder, 'file': file})
 
-    def ignores(self, folder) -> dict:
+    def ignores(self, folder: str) -> dict:
         """ Takes one parameter, folder, and returns the content of the .stignore as the ignored
             field. A second field, expanded, provides a list of strings which represent globbing
             patterns described by gobwas/glob (based on standard wildcards) that match the patterns
@@ -87,7 +85,7 @@ class Database(BaseAPI):
         """
         return self.get('ignores', params={'folder': folder})
 
-    def set_ignores(self, folder, *patterns) -> dict:
+    def set_ignores(self, folder: str, *patterns) -> dict:
         """ Expects a format similar to the output of GET /rest/db/ignores call, but only
             containing the ignored field (expanded field should be omitted). It takes one
             parameter, folder, and either updates the content of the .stignore echoing it
@@ -105,7 +103,7 @@ class Database(BaseAPI):
         data = {'ignore': list(patterns)}
         return self.post('ignores', params={'folder': folder}, data=data)
 
-    def localchanged(self, folder) -> dict:
+    def localchanged(self, folder: str) -> dict:
         """ Takes one mandatory parameter, folder, and returns the list of files which were changed
             locally in a receive-only folder. Thus, they differ from the global state and could be
             reverted by pulling from remote devices again, see POST /rest/db/revert.
@@ -120,7 +118,7 @@ class Database(BaseAPI):
         """
         return self.get('localchanged', params={'folder': folder})
 
-    def need(self, folder, page=None, perpage=None) -> dict:
+    def need(self, folder: str, page: int = None, perpage: int = None) -> dict:
         """ Takes one mandatory parameter, folder, and returns lists of files which are needed by
             this device in order for it to become in sync.
 
@@ -154,7 +152,7 @@ class Database(BaseAPI):
         assert isinstance(perpage, int) or perpage is None
         return self.get('need', params={'folder': folder, 'page': page, 'perpage': perpage})
 
-    def override(self, folder) -> None:
+    def override(self, folder: str) -> None:
         """ Request override of a send-only folder. Override means to make the local version
             latest, overriding changes made on other devices. This API call does nothing if
             the folder is not a send-only folder.
@@ -167,7 +165,7 @@ class Database(BaseAPI):
         """
         self.post('override', params={'folder': folder})
 
-    def prio(self, folder, file) -> None:
+    def prio(self, folder: str, file: str) -> None:
         """ Moves the file to the top of the download queue.
 
             Args:
@@ -179,7 +177,7 @@ class Database(BaseAPI):
         """
         self.post('prio', params={'folder': folder, 'file': file})
 
-    def remoteneed(self, folder, device) -> dict:
+    def remoteneed(self, folder: str, device: str) -> dict:
         """ Takes the mandatory parameters folder and device and returns the list of files which
             are needed by that remote device in order for it to become in sync with the shared folder.
 
@@ -190,7 +188,7 @@ class Database(BaseAPI):
         """
         return self.get('remoteneed', params={'folder': folder, 'device': device})
 
-    def revert(self, folder) -> None:
+    def revert(self, folder: str) -> None:
         """ Request revert of a receive-only folder. Reverting a folder means to undo all local
             changes. This API call does nothing if the folder is not a receive-only folder.
 
@@ -198,7 +196,7 @@ class Database(BaseAPI):
         """
         self.post('revert', params={'folder': folder})
 
-    def scan(self, folder, sub=None, delay=None) -> str:
+    def scan(self, folder: str, sub: str = None, delay: int = None) -> str:
         """ Request immediate scan. Takes the optional parameters folder (folder ID), sub (path
             relative to the folder root) and next (time in seconds). If a folder is omitted or
              empty, all folders are scanned. If a sub is given, only this path (and children, in
@@ -218,11 +216,11 @@ class Database(BaseAPI):
         """
         if not sub:
             sub = ''
-        assert isinstance(sub, string_types)
+        assert isinstance(sub, str)
         assert isinstance(delay, int) or delay is None
         return self.post('scan', params={'folder': folder, 'sub': sub, 'next': delay})
 
-    def status(self, folder) -> dict:
+    def status(self, folder: str) -> dict:
         """ Returns information about the current status of a folder.
 
             Note:
