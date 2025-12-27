@@ -1,6 +1,6 @@
 source: /files/source/
 destination: /files/destination/
 
-event: create
+filters: ItemFinished
 recursive: true
 exclude: ".*\\.tmp|.*/shadows/.*|.*/\\.stfolder/.*|.*/config/.*"
