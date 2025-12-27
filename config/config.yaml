@@ -1,5 +1,5 @@
-source: /source/
-destination: /destination/
+source: /files/source/
+destination: /files/destination/
 
 event: create
 recursive: true

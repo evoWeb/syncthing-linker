@@ -15,26 +15,21 @@ volumes:
       o: bind
       type: none
       device: ${CONFIG_FOLDER:-./config}
-  source:
+  files:
     driver: local
     driver_opts:
       o: bind
       type: none
-      device: ${SOURCE_FOLDER:-./files/source}
-  destination:
-    driver: local
-    driver_opts:
-      o: bind
-      type: none
-      device: ${DESTINATION_FOLDER:-./files/destination}
+      device: ${SOURCE_FOLDER:-./files}
 
 services:
   linker:
     image: evoweb/syncthing-linker:${TAG:-latest}
     volumes:
       - config:/config
-      - source:/source
-      - destination:/destination
+      # source and destination folders need to be subfolders of files
+      # @see config/config.yaml line 1-2
+      - files:/files
     environment:
       PUID: 1000
       PGID: 1000
@@ -56,8 +51,7 @@ services:
       - app:/usr/src/app
 
       - config:/config
-      - source:/source
-      - destination:/destination
+      - files:/files
     environment:
       PUID: 1000
       PGID: 1000

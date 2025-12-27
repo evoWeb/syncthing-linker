@@ -18,5 +18,6 @@ connect:
 
 .PHONY: build
 build:
-	TAG=v1.0.0 docker compose build linker-development
+	TAG=latest docker compose build linker-development
+	docker image tag evoweb/syncthing-linker:latest evoweb/syncthing-linker:v1.0.0
 .DEFAULT_GOAL := build
