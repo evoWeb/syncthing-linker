@@ -89,7 +89,7 @@ class Syncthing(object):
         self.debug = Debug(api_key, **kwargs)
         self.noauth = Noauth(api_key, **kwargs)
         self.service = Service(api_key, **kwargs)
-        self.stats = Statistics(api_key, **kwargs)
+        self.statistics = Statistics(api_key, **kwargs)
         self.system = System(api_key, **kwargs)
 
     def events(self, last_seen_id: int | None = None, filters: list[str] | None = None, **kwargs):
