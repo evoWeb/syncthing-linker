@@ -57,3 +57,14 @@ class Config(BaseAPI):
                  List[str]
         """
         return self.get('devices')
+
+    def folder(self, folder: str) -> dict:
+        """ returns the folder/device for the given ID
+
+            Args:
+                folder (str):
+
+            Returns:
+                dict
+        """
+        return self.get(f'folders/{folder}')
