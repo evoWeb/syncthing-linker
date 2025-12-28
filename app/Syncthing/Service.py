@@ -14,9 +14,6 @@ class Service(BaseAPI):
             substitutions). Takes one parameter, id, and returns either a valid device ID in
             modern format or an error.
 
-            Args:
-                device_id (str)
-
             Raises:
                 SyncthingError: when ``device_id`` is an invalid length.
         """

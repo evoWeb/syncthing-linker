@@ -49,12 +49,7 @@ class Database(BaseAPI):
         return self.get('completion', params={'folder': folder, 'device': device}).get('completion', None)
 
     def file(self, folder: str, file: str) -> dict:
-        """ Returns most data about a given file, including version and availability.
-
-            Args:
-                folder (str):
-                file (str):
-        """
+        """ Returns most data about a given file, including version and availability. """
         return self.get('file', params={'folder': folder, 'file': file})
 
     def ignores(self, folder: str) -> dict:
@@ -67,9 +62,6 @@ class Database(BaseAPI):
             ``!`` to negate the glob, ``(?i)`` to do case-insensitive matching and
             ``(?d)`` to enable removing of ignored files in an otherwise empty
             directory.
-
-            Args:
-                folder
         """
         return self.get('ignores', params={'folder': folder})
 
@@ -78,10 +70,6 @@ class Database(BaseAPI):
             containing the ignored field (expanded field should be omitted). It takes one
             parameter, folder, and either updates the content of the .stignore echoing it
             back as a response, or returns an error.
-
-            Args:
-                folder (str):
-                patterns (str):
         """
         if not patterns:
             return {}
@@ -94,9 +82,6 @@ class Database(BaseAPI):
             reverted by pulling from remote devices again, see POST /rest/db/revert.
 
             The results can be paginated using the common pagination parameters.
-
-            Args:
-                folder (str):
         """
         return self.get('localchanged', params={'folder': folder})
 
@@ -142,12 +127,7 @@ class Database(BaseAPI):
         self.post('override', params={'folder': folder})
 
     def prio(self, folder: str, file: str) -> None:
-        """ Moves the file to the top of the download queue.
-
-            Args:
-                folder (str):
-                file (str):
-        """
+        """ Moves the file to the top of the download queue. """
         self.post('prio', params={'folder': folder, 'file': file})
 
     def remoteneed(self, folder: str, device: str) -> dict:

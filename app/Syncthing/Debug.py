@@ -61,7 +61,7 @@ class Debug(BaseAPI):
             and file (folder relative path) parameters.
 
             Args:
-                folder (str): folder relative path
-                file (str): folder relative path
+                folder (str): Folder ID.
+                file (str): file relative path
         """
         return self.post('file', params={'folder': folder, 'file': file})

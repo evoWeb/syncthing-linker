@@ -32,14 +32,6 @@ class Syncthing(object):
 
         Wrapping all endpoints described in https://docs.syncthing.net/dev/rest.html
 
-        Args:
-            api_key (str)
-            host (str)
-            port (int)
-            timeout (float)
-            is_https (bool)
-            ssl_cert_file (str)
-
         Attributes:
             cluster: instance of `Cluster`.
             config: instance of `Config`.
