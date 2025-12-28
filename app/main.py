@@ -1,14 +1,24 @@
 #!/usr/bin/env python
 
+import logging
 import os
+import sys
 import yaml
+
+from pathlib import Path
 
 from Syncthing.Syncthing import Syncthing
 from Syncthing.Syncthing import syncthing_factory
 from Syncthing.SyncthingError import SyncthingError
 
 class Main:
+    _logger: logging.Logger
+    _key: str
+    _config: dict
+
     def __init__(self):
+        self.prepare_logger()
+
         self.key = self.get_api_key()
         self.config = self.load_config()
 
@@ -20,6 +30,14 @@ class Main:
         self.check_connection(syncthing)
 
         self.loop_events(syncthing, filters)
+
+    def prepare_logger(self) -> None:
+        logging.basicConfig(
+            level=logging.INFO,
+            format='%(asctime)s - %(levelname)s - %(message)s',
+            stream=sys.stderr  # stderr is unbuffered!
+        )
+        self._logger = logging.getLogger(__name__)
 
     @staticmethod
     def get_api_key() -> str:
@@ -67,7 +85,8 @@ class Main:
                 print(e)
                 exit(1)
 
-    def loop_events(self, syncthing: Syncthing, filters) -> None:
+    def loop_events(self, syncthing: Syncthing, filters: list[str]) -> None:
+        self._logger.info('Waiting for events')
         last_seen_id: int | None = None
         while True:
             if last_seen_id:
@@ -85,13 +104,46 @@ class Main:
                 print('bye bye')
                 exit(0)
 
-    def process_event(self, syncthing: Syncthing, event) -> None:
-        if event['data']['error'] is str:
+    def process_event(self, syncthing: Syncthing, event: dict) -> None:
+        data: dict = event.get('data', {})
+        if data.get('error', None) is not None or 'folder' not in data or 'item' not in data:
             return
-        file = syncthing.database.file(event['data']['folder'], event['data']['item'])
-        print(syncthing.statistics.folder())
-        print(event)
-        print(file)
+
+        try:
+            folder: dict = syncthing.config.folder(data['folder'])
+            file: dict = syncthing.database.file(data['folder'], data['item'])
+            source = folder['path'] + file['local']['name']
+        except KeyError:
+            return
+
+        source_path = Path(source)
+        if not source_path.exists():
+            self._logger.info(f'Ignoring event for {source} because it does not exist.')
+            return
+        if not source.startswith(self.config['source']):
+            self._logger.info(f'Ignoring event for {source} because it does not start with {self.config["source"]}.')
+            return
+
+        destination: str = self.config['destination'] + source[len(self.config['source']):]
+        destination_path = Path(destination)
+
+        destination_parent = Path(destination_path.parent)
+        if not destination_parent.exists():
+            destination_parent.mkdir(parents=True, exist_ok=True)
+            self._logger.info(f'Created parent directory {destination_parent} for {destination}.')
+
+        if destination_path.exists():
+            # we don't want to overwrite existing files
+            return
+
+        try:
+            destination_path.hardlink_to(source)
+            self._logger.info(f'Linked {source} to {destination}')
+        except FileExistsError:
+            return
+        except OSError as e:
+            self._logger.error(f'Error linking {source} to {destination}: {e}')
+            return
 
 if __name__ == '__main__':
     Main()
