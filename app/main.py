@@ -47,7 +47,7 @@ class Main:
         return key
 
     @staticmethod
-    def load_config(config_path ='/config/config.yaml') -> dict | None:
+    def load_config(config_path: str = '/config/config.yaml') -> dict | None:
         """ Load configuration and check if minimum requirements are met """
         try:
             with open(config_path, 'r', encoding='utf-8') as file:
