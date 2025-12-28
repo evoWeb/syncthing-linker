@@ -13,7 +13,7 @@ development:
 
 .PHONY: connect
 connect:
-	docker compose exec linker-development bash
+	docker compose exec linker-development sh
 
 
 .PHONY: build
