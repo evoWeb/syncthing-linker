@@ -3,4 +3,4 @@ destination: /files/destination/
 
 filters: ItemFinished
 recursive: true
-exclude: ".*\\.tmp|.*/shadows/.*|.*/\\.stfolder/.*|.*/config/.*"
+excludes: ".*\\.tmp|.*/shadows/.*|.*/\\.stfolder.*/.*|.*/config/.*"

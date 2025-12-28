@@ -16,6 +16,5 @@ COPY --from=builder /install /usr/local
 
 COPY app/. .
 COPY config /config
-COPY scripts /scripts
 
 CMD [ "python", "main.py" ]

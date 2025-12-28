@@ -11,6 +11,32 @@ from Syncthing.Syncthing import Syncthing
 from Syncthing.Syncthing import syncthing_factory
 from Syncthing.SyncthingError import SyncthingError
 
+
+def load_config(config_path: str = '/config/config.yaml') -> dict | None:
+    """ Load configuration and check if minimum requirements are met """
+    try:
+        with open(config_path, 'r', encoding='utf-8') as file:
+            config_data = yaml.safe_load(file)
+
+        if config_data is None:
+            raise Exception('Configuration is empty.')
+
+        if 'source' not in config_data:
+            config_data['source'] = '/files/source/'
+        if 'destination' not in config_data:
+            config_data['destination'] = '/files/destination/'
+        if 'filters' not in config_data:
+            config_data['filters'] = 'ItemFinished'
+
+        return config_data
+    except FileNotFoundError:
+        print(f"Fehler: Die Konfigurationsdatei '{config_path}' wurde nicht gefunden.")
+        return None
+    except yaml.YAMLError as yamlError:
+        print(f"Fehler beim Parsen der YAML-Datei: {yamlError}")
+        return None
+
+
 class Main:
     _logger: logging.Logger
     _key: str
@@ -18,9 +44,8 @@ class Main:
 
     def __init__(self):
         self.prepare_logger()
-
+        self.config = load_config()
         self.key = self.get_api_key()
-        self.config = self.load_config()
 
         filters: list[str] | None = None
         if self.config.get('filters', '') != '':
@@ -47,38 +72,13 @@ class Main:
         return key
 
     @staticmethod
-    def load_config(config_path: str = '/config/config.yaml') -> dict | None:
-        """ Load configuration and check if minimum requirements are met """
-        try:
-            with open(config_path, 'r', encoding='utf-8') as file:
-                config_data = yaml.safe_load(file)
-
-            if config_data is None:
-                raise Exception('Configuration is empty.')
-
-            if 'source' not in config_data:
-                config_data['source'] = '/files/source/'
-            if 'destination' not in config_data:
-                config_data['destination'] = '/files/destination/'
-            if 'filters' not in config_data:
-                config_data['filters'] = 'ItemFinished'
-
-            return config_data
-        except FileNotFoundError:
-            print(f"Fehler: Die Konfigurationsdatei '{config_path}' wurde nicht gefunden.")
-            return None
-        except yaml.YAMLError as yamlError:
-            print(f"Fehler beim Parsen der YAML-Datei: {yamlError}")
-            return None
-
-    @staticmethod
-    def check_connection(wrapper: Syncthing) -> None:
+    def check_connection(syncthing: Syncthing) -> None:
         """ Checks the connection to the Syncthing API """
-        wrapper.system.connections()
+        syncthing.system.connections()
 
         # supports GET/POST semantics
-        sync_errors = wrapper.system.errors()
-        wrapper.system.clear()
+        sync_errors = syncthing.system.errors()
+        syncthing.system.clear()
 
         if sync_errors:
             for e in sync_errors:
@@ -112,38 +112,43 @@ class Main:
         try:
             folder: dict = syncthing.config.folder(data['folder'])
             file: dict = syncthing.database.file(data['folder'], data['item'])
-            source = folder['path'] + file['local']['name']
+            source_file = folder['path'] + file['local']['name']
         except KeyError:
             return
 
-        source_path = Path(source)
+        source_path = Path(source_file)
         if not source_path.exists():
-            self._logger.info(f'Ignoring event for {source} because it does not exist.')
+            self._logger.info(f'Ignoring event for {source_file} because it does not exist.')
             return
-        if not source.startswith(self.config['source']):
-            self._logger.info(f'Ignoring event for {source} because it does not start with {self.config["source"]}.')
+        if not source_file.startswith(self.config['source']):
+            self._logger.info(f'Ignoring event for {source_file} because it does not start with {self.config["source"]}.')
             return
 
-        destination: str = self.config['destination'] + source[len(self.config['source']):]
-        destination_path = Path(destination)
+        destination_file: str = self.config['destination'] + source_file[len(self.config['source']):]
+        destination_path = Path(destination_file)
 
-        destination_parent = Path(destination_path.parent)
+        destination_parent = destination_path.parent
         if not destination_parent.exists():
             destination_parent.mkdir(parents=True, exist_ok=True)
-            self._logger.info(f'Created parent directory {destination_parent} for {destination}.')
+            self._logger.info(f'Created parent directory {destination_parent} for {destination_file}.')
 
         if destination_path.exists():
             # we don't want to overwrite existing files
             return
 
         try:
-            destination_path.hardlink_to(source)
-            self._logger.info(f'Linked {source} to {destination}')
+            destination_path.hardlink_to(source_file)
+            self._logger.info(f'Linked {source_file} to {destination_file}')
         except FileExistsError:
             return
         except OSError as e:
-            self._logger.error(f'Error linking {source} to {destination}: {e}')
+            self._logger.error(f'Error linking {source_file} to {destination_file}: {e}')
             return
 
 if __name__ == '__main__':
     Main()
+
+__all__ = [
+    'load_config',
+    'Main'
+]
