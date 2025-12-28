@@ -8,7 +8,7 @@ SHELL := /bin/bash
 
 .PHONY: development
 development:
-	docker compose up linker-development
+	docker compose up linker-development --remove-orphans
 
 
 .PHONY: connect
