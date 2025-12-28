@@ -30,10 +30,10 @@ def load_config(config_path: str = '/config/config.yaml') -> dict | None:
 
         return config_data
     except FileNotFoundError:
-        print(f"Fehler: Die Konfigurationsdatei '{config_path}' wurde nicht gefunden.")
+        print(f'Fehler: Die Konfigurationsdatei "{config_path}" wurde nicht gefunden.')
         return None
     except yaml.YAMLError as yamlError:
-        print(f"Fehler beim Parsen der YAML-Datei: {yamlError}")
+        print(f'Fehler beim Parsen der YAML-Datei: {yamlError}')
         return None
 
 

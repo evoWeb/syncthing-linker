@@ -24,9 +24,6 @@ class Database(BaseAPI):
                     (0-based, defaults to unlimited depth)
                 prefix (str): Defines a prefix within the tree where to start
                     building the structure.
-
-            Returns:
-                dict
         """
         assert isinstance(levels, int) or levels is None
         assert isinstance(prefix, str) or prefix is None
@@ -48,9 +45,6 @@ class Database(BaseAPI):
             Args:
                 device (str): The Syncthing device the folder is syncing to.
                 folder (str): The folder that is being synced.
-
-            Returns:
-                int
         """
         return self.get('completion', params={'folder': folder, 'device': device}).get('completion', None)
 
@@ -60,9 +54,6 @@ class Database(BaseAPI):
             Args:
                 folder (str):
                 file (str):
-
-            Returns:
-                dict
         """
         return self.get('file', params={'folder': folder, 'file': file})
 
@@ -79,9 +70,6 @@ class Database(BaseAPI):
 
             Args:
                 folder
-
-            Returns:
-                dict
         """
         return self.get('ignores', params={'folder': folder})
 
@@ -94,9 +82,6 @@ class Database(BaseAPI):
             Args:
                 folder (str):
                 patterns (str):
-
-            Returns:
-                dict
         """
         if not patterns:
             return {}
@@ -112,9 +97,6 @@ class Database(BaseAPI):
 
             Args:
                 folder (str):
-
-            Returns:
-                dict
         """
         return self.get('localchanged', params={'folder': folder})
 
@@ -144,9 +126,6 @@ class Database(BaseAPI):
                     collection of results.
                 perpage (int): If defined, applies pagination across the
                     collection of results.
-
-            Returns:
-                dict
         """
         assert isinstance(page, int) or page is None
         assert isinstance(perpage, int) or perpage is None
@@ -159,9 +138,6 @@ class Database(BaseAPI):
 
             Args:
                 folder (str): folder ID.
-
-            Returns:
-                None
         """
         self.post('override', params={'folder': folder})
 
@@ -171,9 +147,6 @@ class Database(BaseAPI):
             Args:
                 folder (str):
                 file (str):
-
-            Returns:
-                None
         """
         self.post('prio', params={'folder': folder, 'file': file})
 
@@ -182,9 +155,6 @@ class Database(BaseAPI):
             are needed by that remote device in order for it to become in sync with the shared folder.
 
             The results can be paginated using the common pagination parameters.
-
-            Returns:
-                dict
         """
         return self.get('remoteneed', params={'folder': folder, 'device': device})
 
@@ -210,9 +180,6 @@ class Database(BaseAPI):
                     the given path children are scanned.
                 delay (int): Delays Syncthing's automated rescan interval for
                     a given number of seconds. Called ''next'' in Syncthing docs
-
-            Returns:
-                str
         """
         if not sub:
             sub = ''
@@ -229,8 +196,5 @@ class Database(BaseAPI):
 
             Args:
                 folder (str): Folder ID.
-
-            Returns:
-                dict
         """
         return self.get('status', params={'folder': folder})

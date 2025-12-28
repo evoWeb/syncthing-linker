@@ -13,9 +13,6 @@ class Folder(BaseAPI):
             during scanning or pulling.
 
             The results can be paginated using the common pagination parameters.
-
-            Returns:
-                dict
         """
         return self.get('errors')
 
@@ -23,9 +20,6 @@ class Folder(BaseAPI):
     def pullerrors(self) -> dict:
         """ Deprecated since the version v0.14.53: This endpoint still works as before but is
             deprecated. Use GET /rest/folder/errors instead, which returns the same information.
-
-            Returns:
-                dict
         """
         return self.errors()
 
@@ -35,9 +29,6 @@ class Folder(BaseAPI):
             configuration. Each entry specifies when the file version was archived as the
             versionTime, the modTime when it was last modified before being archived, and the size
             in bytes.
-
-            Returns:
-                dict
         """
         return self.get('versions', params={'folder': folder})
 
@@ -49,8 +40,5 @@ class Folder(BaseAPI):
             Takes the mandatory parameter folder (folder ID). Returns an object containing any
             error messages that occurred during restoration of the file, with the file path as
             an attribute name.
-
-            Returns:
-                None
         """
         self.post('versions', params={'folder': folder}, data=files)

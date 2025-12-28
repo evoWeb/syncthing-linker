@@ -9,9 +9,5 @@ class Noauth(BaseAPI):
     prefix = '/rest/noauth/'
 
     def health(self) -> bool:
-        """ Returns true if the server replies with a {"status": "OK"} object.
-
-            Returns:
-                bool
-        """
+        """ Returns true if the server replies with a {"status": "OK"} object. """
         return self.get('health').get('status', '') == 'OK'

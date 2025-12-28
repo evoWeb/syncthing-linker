@@ -87,9 +87,6 @@ class Events(BaseAPI):
                     only receive events that have been subscribed to.
                 limit (int): The number of events to query in the history
                     to catch up to the current state.
-
-            Returns:
-                generator[dict]
         """
 
         # coerce
@@ -135,37 +132,22 @@ class Events(BaseAPI):
         """ This convenience endpoint provides the same event stream, but pre-filtered to show
             only LocalChangeDetected and RemoteChangeDetected event types. The events parameter
             is not used.
-
-            Returns:
-                generator[dict]
         """
         for event in self.events('events/disk', None, self._limit):
             yield event
 
     def stop(self) -> None:
-        """ Breaks the while-loop while the generator is polling for event changes.
-
-            Returns:
-                  None
-        """
+        """ Breaks the while-loop while the generator is polling for event changes. """
         self.blocking = False
 
     @property
     def count(self) -> int:
-        """ The number of events that have been processed by this event stream.
-
-            Returns:
-                int
-        """
+        """ The number of events that have been processed by this event stream. """
         return self._count
 
     @property
     def last_seen_id(self) -> int:
-        """ The id of the last seen event.
-
-            Returns:
-                int
-        """
+        """ The id of the last seen event. """
         return self._last_seen_id
 
     def __iter__(self) -> Generator[dict]:

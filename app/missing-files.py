@@ -32,6 +32,7 @@ def link_missing_file(source_path: Path, config: dict) -> None:
         print(f'Error linking {source} to {destination_file}: {e}')
         return
 
+
 def main():
     config = load_config()
 
@@ -59,5 +60,5 @@ def main():
 
         link_missing_file(source_file, config)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()

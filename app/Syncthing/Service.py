@@ -19,9 +19,6 @@ class Service(BaseAPI):
 
             Raises:
                 SyncthingError: when ``device_id`` is an invalid length.
-
-            Returns:
-                str
         """
         return self.get('deviceid', params={'id': device_id}).get('id')
 
@@ -29,18 +26,15 @@ class Service(BaseAPI):
         """ Returns a list of canonicalized localization codes, as picked up from the
             Accept-Language header sent by the browser.
 
-            Returns:
-                List[str]
-
-                >>> s = syncthing_factory()
-                >>> len(s.service.lang())
-                1
-                >>> s.service.lang()[0]
-                ''
-                >>> s.service.lang('en-us')
-                ['en-us']
-                >>> s.service.get('lang', headers={'Accept-Language': 'en-us'})
-                ['en-us']
+            >>> s = syncthing_factory()
+            >>> len(s.service.lang())
+            1
+            >>> s.service.lang()[0]
+            ''
+            >>> s.service.lang('en-us')
+            ['en-us']
+            >>> s.service.get('lang', headers={'Accept-Language': 'en-us'})
+            ['en-us']
         """
         if accept_language:
             result = self.get('lang', headers={'Accept-Language': accept_language})
@@ -54,9 +48,6 @@ class Service(BaseAPI):
 
             Args:
                 length (int): default ``32``.
-
-            Returns:
-                str
 
             >>> s = syncthing_factory()
             >>> len(s.service.random_string())
@@ -80,9 +71,6 @@ class Service(BaseAPI):
 
     def report(self) -> dict:
         """ Returns the data sent in the anonymous usage report.
-
-            Returns:
-                dict
 
             >>> s = syncthing_factory()
             >>> report = s.service.report()

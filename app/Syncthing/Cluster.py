@@ -15,9 +15,6 @@ class Cluster(BaseAPI):
 
             Args:
                 device (str): Device ID.
-
-            Returns:
-                dict: with keys ``success`` and ``error``.
         """
         response = self.delete('devices', params={'device': device}, return_response=True)
         error = response.text
@@ -28,9 +25,6 @@ class Cluster(BaseAPI):
     def pending_device(self) -> dict:
         """ Lists remote devices which have tried to connect but are not yet configured in our
             instance.
-
-            Returns:
-                dict
         """
         return self.get('devices')
 
@@ -57,8 +51,5 @@ class Cluster(BaseAPI):
         """ Lists folders which remote devices have offered to us, but are not yet shared from our
             instance to them. Takes the optional device parameter to only return folders offered by
             a specific remote device. Other offering devices are also omitted from the result.
-
-            Returns:
-                dict
         """
         return self.delete('folders')

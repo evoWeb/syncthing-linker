@@ -12,9 +12,6 @@ class Debug(BaseAPI):
     def cpuprof(self) -> dict:
         """ Used to capture a profile of what Syncthing is doing on the CPU. See Profiling.
 
-            Returns:
-                dict
-
             >>> s = syncthing_factory().debug
             >>> debug = s.debug()
             >>> debug
@@ -34,9 +31,6 @@ class Debug(BaseAPI):
     # DEPRECATED
     def heapprof(self) -> dict:
         """ Used to capture a profile of what Syncthing is doing with the heap memory. See Profiling.
-
-            Returns:
-                dict
 
             >>> s = syncthing_factory().system
             >>> debug = s.debug()
@@ -59,9 +53,6 @@ class Debug(BaseAPI):
             a “support bundle” as a zipped archive, which should be sent to the developers after
             verifying it contains no sensitive personal information. Credentials for the web GUI
             and the API key are automatically redacted already.
-
-            Returns:
-                dict
         """
         return self.get('support')
 
@@ -72,8 +63,5 @@ class Debug(BaseAPI):
             Args:
                 folder (str): folder relative path
                 file (str): folder relative path
-
-            Returns:
-                None
         """
         return self.post('file', params={'folder': folder, 'file': file})

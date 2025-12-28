@@ -21,9 +21,6 @@ def keys_to_datetime(obj: dict | None, *keys) -> dict:
             keys (str): keys of the object being converted into DateTime
                 instances.
 
-        Returns:
-            dict: ``obj`` inplace.
-
         >>> keys_to_datetime(None) is None
         True
         >>> keys_to_datetime({})
@@ -59,9 +56,6 @@ def parse_datetime(date_string: str | None, **kwargs) -> datetime.datetime | Non
             date_string (str): string to be formatted.
 
         ``**kwargs`` is passed directly to :func:`.dateutil_parser`.
-
-        Returns:
-            :py:class:`~datetime.datetime`
     """
     if not date_string:
         return None
@@ -88,9 +82,6 @@ class System(BaseAPI):
 
         Args:
             path (str): glob pattern.
-
-        Returns:
-            List[str]
         """
         params = None
         if path:
@@ -104,9 +95,6 @@ class System(BaseAPI):
             deprecated. Use /rest/config instead.
 
             Returns the current configuration.
-
-            Returns:
-                dict
 
             >>> s = syncthing_factory().system
             >>> config = s.config()
@@ -148,9 +136,6 @@ class System(BaseAPI):
 
             Returns whether the config is in sync, i.e. whether the running configuration is
             the same as that on disk.
-
-            Returns:
-                bool
         """
         status = self.get('config/insync').get('configInSync', False)
         if status is None:
@@ -162,9 +147,6 @@ class System(BaseAPI):
 
             The connection types are tcp-client, tcp-server, relay-client, relay-server,
             quic-client and quic-server.
-
-            Returns:
-                dict
 
             >>> s = syncthing_factory().system
             >>> connections = s.connections()
@@ -178,11 +160,7 @@ class System(BaseAPI):
         return self.get('connections')
 
     def discovery(self) -> dict:
-        """ Returns the contents of the local discovery cache.
-
-            Returns:
-                dict
-        """
+        """ Returns the contents of the local discovery cache. """
         return self.get('discovery')
 
     def add_discovery(self, device: str, address: str) -> None:
@@ -192,18 +170,11 @@ class System(BaseAPI):
                 device (str): Device ID.
                 address (str): destination address, a valid hostname or
                     IP address that's serving a Syncthing instance.
-
-            Returns:
-                None
         """
         self.post('discovery', params={'device': device, 'address': address})
 
     def clear(self) -> None:
-        """ Post with an empty body to remove all recent errors.
-
-            Returns:
-                None
-        """
+        """ Post with an empty body to remove all recent errors. """
         self.post('error/clear')
 
     def clear_errors(self) -> None:
@@ -233,9 +204,6 @@ class System(BaseAPI):
             Args:
                 message (str): Plain-text message to display.
 
-            Returns:
-                None
-
             >>> s = syncthing_factory()
             >>> s.system.show_error('my error msg')
             >>> s.system.errors()[0]
@@ -251,18 +219,11 @@ class System(BaseAPI):
     def log(self) -> dict:
         """ Returns the list of recent log entries. The optional since parameter limits the results
             to a message newer than the given timestamp in RFC 3339 format.
-
-            Returns:
-                dict
         """
         return self.get('log')
 
     def loglevels(self) -> dict:
-        """ Returns the set of log facilities and their current log level.
-
-            Returns:
-                dict
-        """
+        """ Returns the set of log facilities and their current log level. """
         return self.get('loglevels')
 
     def set_loglevels(self, facility: str, level: str) -> None:
@@ -271,19 +232,11 @@ class System(BaseAPI):
             Args:
                 facility (str): Facility to set.
                 level (str): Level to set.
-
-            Returns:
-                None
         """
         self.post('loglevels', data={facility: level})
 
     def paths(self) -> dict:
-        """ Returns the path locations used internally for storing configuration,
-            database, and others.
-
-            Returns:
-                Dict
-        """
+        """ Returns the path locations used internally for storing configuration, database, and others. """
         return self.get('paths')
 
     def pause(self, device: str) -> dict:
@@ -310,9 +263,6 @@ class System(BaseAPI):
 
             Args:
                 method (str): uses a given HTTP method, options are ``GET`` and ``POST``.
-
-            Returns:
-                dict
         """
         assert method in ('GET', 'POST')
         if method == 'GET':
@@ -323,9 +273,6 @@ class System(BaseAPI):
         """ Post with an empty body to erase the current index database and restart Syncthing. With
             no query parameters, the entire database is erased from the disk. By specifying the
             folder parameter with a valid folder ID, only information for that folder will be erased
-
-            Returns:
-                None
         """
         warnings.warn('This is a destructive action that cannot be undone.')
         self.post('reset', data={})
@@ -337,19 +284,12 @@ class System(BaseAPI):
 
             Args:
                 folder (str): Folder ID.
-
-            Returns:
-                None
         """
         warnings.warn('This is a destructive action that cannot be undone.')
         self.post('reset', data={}, params={'folder': folder})
 
     def restart(self) -> None:
-        """ Post with an empty body to immediately restart Syncthing.
-
-            Returns:
-                None
-        """
+        """ Post with an empty body to immediately restart Syncthing. """
         self.post('restart')
 
     def resume(self, device: str | None = None) -> dict:
@@ -376,19 +316,12 @@ class System(BaseAPI):
         return {'success': resp.status_code == requests.codes.ok, 'error': error}
 
     def shutdown(self) -> None:
-        """ Post with an empty body to cause Syncthing to exit and not restart.
-
-            Returns:
-                None
-        """
+        """ Post with an empty body to cause Syncthing to exit and not restart. """
         self.post('shutdown')
 
     def status(self) -> dict:
         """ Returns information about current system status and resource usage. The CPU percent
             value has been deprecated from the API and will always report 0.
-
-            Returns:
-                dict
         """
         resp = self.get('status')
         resp = keys_to_datetime(resp, 'startTime')
@@ -397,35 +330,21 @@ class System(BaseAPI):
     def upgrade(self) -> dict:
         """ Checks for a possible upgrade and returns an object describing the newest version
             and upgrade possibility.
-
-            Returns:
-                dict
         """
         return self.get('upgrade')
 
     def can_upgrade(self) -> bool:
-        """ Returns when there's a newer version than the instance running.
-
-            Returns:
-                bool
-        """
+        """ Returns when there's a newer version than the instance running. """
         return (self.upgrade() or {}).get('newer', False)
 
     def do_upgrade(self) -> None:
         """ Perform an upgrade to the newest released version and restart. Does nothing if there
             is no newer version than currently running.
-
-            Returns:
-                None
         """
         self.post('upgrade')
 
     def version(self) -> dict:
-        """ Returns the current Syncthing version information.
-
-            Returns:
-                dict
-        """
+        """ Returns the current Syncthing version information. """
         return self.get('version')
 
 __all__ = [
