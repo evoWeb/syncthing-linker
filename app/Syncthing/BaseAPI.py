@@ -29,10 +29,10 @@ class BaseAPI(object):
 
         self.api_key = api_key
         self.host = host
-        self.is_https = is_https
         self.port = port
-        self.ssl_cert_file = ssl_cert_file
         self.timeout = timeout
+        self.is_https = is_https
+        self.ssl_cert_file = ssl_cert_file
         self.verify = True if ssl_cert_file or is_https else False
         self._headers = {
             'X-API-Key': api_key
@@ -50,8 +50,7 @@ class BaseAPI(object):
         return_response: bool = False,
         raw_exceptions: bool = False
     ) -> Response | int | str | dict | list:
-        endpoint = self.prefix + endpoint
-        return self._request('GET', endpoint, data, headers, params, return_response, raw_exceptions)
+        return self._request('GET', self.prefix + endpoint, data, headers, params, return_response, raw_exceptions)
 
     def post(
         self,
@@ -62,8 +61,7 @@ class BaseAPI(object):
         return_response: bool = False,
         raw_exceptions: bool = False
     ) -> Response | int | str | dict | list:
-        endpoint = self.prefix + endpoint
-        return self._request('POST', endpoint, data, headers, params, return_response, raw_exceptions)
+        return self._request('POST', self.prefix + endpoint, data, headers, params, return_response, raw_exceptions)
 
     def put(
         self,
@@ -74,8 +72,7 @@ class BaseAPI(object):
         return_response: bool = False,
         raw_exceptions: bool = False
     ) -> Response | int | str | dict | list:
-        endpoint = self.prefix + endpoint
-        return self._request('PUT', endpoint, data, headers, params, return_response, raw_exceptions)
+        return self._request('PUT', self.prefix + endpoint, data, headers, params, return_response, raw_exceptions)
 
     def delete(
         self,
@@ -86,8 +83,7 @@ class BaseAPI(object):
         return_response: bool = False,
         raw_exceptions: bool = False
     ) -> Response | int | str | dict | list:
-        endpoint = self.prefix + endpoint
-        return self._request('DELETE', endpoint, data, headers, params, return_response, raw_exceptions)
+        return self._request('DELETE', self.prefix + endpoint, data, headers, params, return_response, raw_exceptions)
 
     def _request(
         self,
@@ -156,3 +152,8 @@ class BaseAPI(object):
                 api_err = json_data.get('error')
                 raise SyncthingException(api_err)
             return json_data
+
+__all__ = [
+    'DEFAULT_TIMEOUT',
+    'BaseAPI'
+]
