@@ -73,7 +73,7 @@ class Main:
         try:
             folder: dict = syncthing.config.folder(data['folder'])
             file: dict = syncthing.database.file(data['folder'], data['item'])
-            source_file = folder['path'] + file['local']['name']
+            source_file = folder['path'].rstrip('/') + '/' + file['local']['name']
         except KeyError:
             return
 
