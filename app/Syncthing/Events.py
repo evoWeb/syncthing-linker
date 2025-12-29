@@ -32,7 +32,7 @@ class Events(BaseAPI):
         api_key: str,
         last_seen_id: int = None,
         filters: list[str] = None,
-        limit: int = None,
+        limit: int = 10,
         *args,
         **kwargs
     ):

@@ -50,9 +50,9 @@ class Main:
         last_seen_id: int | None = None
         while True:
             if last_seen_id:
-                event_stream = syncthing.events(limit=10, filters=self.config.filters, last_seen_id=last_seen_id)
+                event_stream = syncthing.events(filters=self.config.filters, last_seen_id=last_seen_id)
             else:
-                event_stream = syncthing.events(limit=10, filters=self.config.filters)
+                event_stream = syncthing.events(filters=self.config.filters)
 
             try:
                 for event in event_stream:
