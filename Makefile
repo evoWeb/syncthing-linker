@@ -16,6 +16,11 @@ connect:
 	docker compose exec linker-development sh
 
 
+.PHONY: missing-files
+missing-files:
+	docker compose exec linker-development python missing-files.py
+
+
 .PHONY: build
 build:
 	TAG=latest docker compose build linker-development
