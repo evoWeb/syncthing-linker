@@ -26,7 +26,6 @@ services:
   linker:
     image: evoweb/syncthing-linker:${TAG:-latest}
     volumes:
-      - config:/config
       # source and destination folders need to be subfolders of files
       # @see config/config.yaml line 1-2
       - files:/files

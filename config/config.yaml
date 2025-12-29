@@ -2,5 +2,4 @@ source: /files/source/
 destination: /files/destination/
 
 filters: ItemFinished
-recursive: true
 excludes: ".*\\.tmp|.*/shadows/.*|.*/\\.stfolder.*/.*|.*/config/.*"

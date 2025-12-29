@@ -3,7 +3,9 @@ import json
 import logging
 import requests
 
-from .SyncthingError import SyncthingError
+from requests import Response
+
+from .SyncthingException import SyncthingException
 
 DEFAULT_TIMEOUT = 10
 
@@ -23,14 +25,14 @@ class BaseAPI(object):
     ):
         if ssl_cert_file:
             if not os.path.exists(ssl_cert_file):
-                raise SyncthingError('ssl_cert_file does not exist at location, %s' % ssl_cert_file)
+                raise SyncthingException('ssl_cert_file does not exist at location, %s' % ssl_cert_file)
 
         self.api_key = api_key
         self.host = host
-        self.is_https = is_https
         self.port = port
-        self.ssl_cert_file = ssl_cert_file
         self.timeout = timeout
+        self.is_https = is_https
+        self.ssl_cert_file = ssl_cert_file
         self.verify = True if ssl_cert_file or is_https else False
         self._headers = {
             'X-API-Key': api_key
@@ -47,9 +49,8 @@ class BaseAPI(object):
         params: dict | None = None,
         return_response: bool = False,
         raw_exceptions: bool = False
-    ) -> requests.Response | int | str | dict | list:
-        endpoint = self.prefix + endpoint
-        return self._request('GET', endpoint, data, headers, params, return_response, raw_exceptions)
+    ) -> Response | int | str | dict | list:
+        return self._request('GET', self.prefix + endpoint, data, headers, params, return_response, raw_exceptions)
 
     def post(
         self,
@@ -59,9 +60,8 @@ class BaseAPI(object):
         params: dict | None = None,
         return_response: bool = False,
         raw_exceptions: bool = False
-    ) -> requests.Response | int | str | dict | list:
-        endpoint = self.prefix + endpoint
-        return self._request('POST', endpoint, data, headers, params, return_response, raw_exceptions)
+    ) -> Response | int | str | dict | list:
+        return self._request('POST', self.prefix + endpoint, data, headers, params, return_response, raw_exceptions)
 
     def put(
         self,
@@ -71,9 +71,8 @@ class BaseAPI(object):
         params: dict | None = None,
         return_response: bool = False,
         raw_exceptions: bool = False
-    ) -> requests.Response | int | str | dict | list:
-        endpoint = self.prefix + endpoint
-        return self._request('PUT', endpoint, data, headers, params, return_response, raw_exceptions)
+    ) -> Response | int | str | dict | list:
+        return self._request('PUT', self.prefix + endpoint, data, headers, params, return_response, raw_exceptions)
 
     def delete(
         self,
@@ -83,9 +82,8 @@ class BaseAPI(object):
         params: dict | None = None,
         return_response: bool = False,
         raw_exceptions: bool = False
-    ) -> requests.Response | int | str | dict | list:
-        endpoint = self.prefix + endpoint
-        return self._request('DELETE', endpoint, data, headers, params, return_response, raw_exceptions)
+    ) -> Response | int | str | dict | list:
+        return self._request('DELETE', self.prefix + endpoint, data, headers, params, return_response, raw_exceptions)
 
     def _request(
         self,
@@ -96,13 +94,13 @@ class BaseAPI(object):
         params: dict | None = None,
         return_response: bool = False,
         raw_exceptions: bool = False
-    ) -> requests.Response | int | str | dict | list:
+    ) -> Response | int | str | dict | list:
         method = method.upper()
 
         endpoint = self._base_url.format(endpoint=endpoint)
 
         if method not in ('GET', 'POST', 'PUT', 'DELETE'):
-            raise SyncthingError('unsupported http verb requested, %s' % method)
+            raise SyncthingException('unsupported http verb requested, %s' % method)
 
         if data is None:
             data = {}
@@ -131,7 +129,7 @@ class BaseAPI(object):
         except requests.RequestException as e:
             if raw_exceptions:
                 raise e
-            raise SyncthingError('http request error', e)
+            raise SyncthingException('http request error', e)
 
         else:
             if return_response:
@@ -152,5 +150,10 @@ class BaseAPI(object):
 
             if isinstance(json_data, dict) and json_data.get('error'):
                 api_err = json_data.get('error')
-                raise SyncthingError(api_err)
+                raise SyncthingException(api_err)
             return json_data
+
+__all__ = [
+    'DEFAULT_TIMEOUT',
+    'BaseAPI'
+]

@@ -6,7 +6,7 @@ from collections import namedtuple
 from dateutil.parser import parse as dateutil_parser
 
 from .BaseAPI import BaseAPI
-from .SyncthingError import SyncthingError
+from .SyncthingException import SyncthingException
 
 
 ErrorEvent = namedtuple('ErrorEvent', 'when, message')
@@ -62,7 +62,7 @@ def parse_datetime(date_string: str | None, **kwargs) -> datetime.datetime | Non
     try:
         ret = dateutil_parser(date_string, **kwargs)
     except (OverflowError, TypeError, ValueError) as e:
-        raise SyncthingError('datetime parsing error from %s' % date_string, e)
+        raise SyncthingException('datetime parsing error from %s' % date_string, e)
     return ret
 
 

@@ -18,8 +18,8 @@ from .Statistics import Statistics
 from .System import System
 
 
-def syncthing_factory():
-    key = os.getenv('SYNCTHING_API_KEY')
+def syncthing_factory(key: str = None):
+    key = key if key != '' else os.getenv('SYNCTHING_API_KEY')
     host = os.getenv('SYNCTHING_HOST', '127.0.0.1')
     port = os.getenv('SYNCTHING_PORT', 8384)
     is_https = bool(int(os.getenv('SYNCTHING_HTTPS', '0')))
@@ -39,7 +39,7 @@ class Syncthing(object):
             debug: instance of `Debug`.
             noauth: instance of `Noauth`.
             system: instance of `System`.
-            stats: instance of `Statistics`.
+            statistics: instance of `Statistics`.
             service: instance of `Service`.
     """
 
