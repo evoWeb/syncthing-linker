@@ -9,7 +9,7 @@ from pathlib import Path
 
 from Syncthing.Syncthing import Syncthing
 from Syncthing.Syncthing import syncthing_factory
-from Syncthing.SyncthingError import SyncthingError
+from Syncthing.SyncthingException import SyncthingException
 
 
 def load_config(config_path: str = '/config/config.yaml') -> dict | None:
@@ -83,7 +83,7 @@ class Main:
         if sync_errors:
             for e in sync_errors:
                 print(e)
-                exit(1)
+            exit(1)
 
     def loop_events(self, syncthing: Syncthing, filters: list[str]) -> None:
         self._logger.info('Waiting for events')
@@ -97,7 +97,8 @@ class Main:
             try:
                 for event in event_stream:
                     self.process_event(syncthing, event)
-            except SyncthingError:
+                    last_seen_id = event['id']
+            except SyncthingException:
                 last_seen_id = event_stream.last_seen_id
             except KeyboardInterrupt:
                 event_stream.stop()

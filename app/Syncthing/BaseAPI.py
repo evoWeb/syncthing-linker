@@ -3,7 +3,7 @@ import json
 import logging
 import requests
 
-from .SyncthingError import SyncthingError
+from .SyncthingException import SyncthingException
 
 DEFAULT_TIMEOUT = 10
 
@@ -23,7 +23,7 @@ class BaseAPI(object):
     ):
         if ssl_cert_file:
             if not os.path.exists(ssl_cert_file):
-                raise SyncthingError('ssl_cert_file does not exist at location, %s' % ssl_cert_file)
+                raise SyncthingException('ssl_cert_file does not exist at location, %s' % ssl_cert_file)
 
         self.api_key = api_key
         self.host = host
@@ -102,7 +102,7 @@ class BaseAPI(object):
         endpoint = self._base_url.format(endpoint=endpoint)
 
         if method not in ('GET', 'POST', 'PUT', 'DELETE'):
-            raise SyncthingError('unsupported http verb requested, %s' % method)
+            raise SyncthingException('unsupported http verb requested, %s' % method)
 
         if data is None:
             data = {}
@@ -131,7 +131,7 @@ class BaseAPI(object):
         except requests.RequestException as e:
             if raw_exceptions:
                 raise e
-            raise SyncthingError('http request error', e)
+            raise SyncthingException('http request error', e)
 
         else:
             if return_response:
@@ -152,5 +152,5 @@ class BaseAPI(object):
 
             if isinstance(json_data, dict) and json_data.get('error'):
                 api_err = json_data.get('error')
-                raise SyncthingError(api_err)
+                raise SyncthingException(api_err)
             return json_data

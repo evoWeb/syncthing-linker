@@ -3,7 +3,7 @@ from urllib3.exceptions import TimeoutError
 from typing import Generator
 
 from .BaseAPI import BaseAPI
-from .SyncthingError import SyncthingError
+from .SyncthingException import SyncthingException
 
 
 class Events(BaseAPI):
@@ -117,7 +117,7 @@ class Events(BaseAPI):
                 # swallow timeout errors for long polling
                 data = None
             except Exception as e:
-                raise SyncthingError('', e)
+                raise SyncthingException('', e)
 
             if data:
                 for event in data:
