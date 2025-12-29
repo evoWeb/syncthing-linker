@@ -4,14 +4,14 @@ import re
 
 from pathlib import Path
 
-from main import load_config
+from AppConfig import AppConfig
 
 
-def link_missing_file(source_path: Path, config: dict) -> None:
+def link_missing_file(source_path: Path, config: AppConfig) -> None:
     """ Recreates the directory structure in 'destination' and hardlinks the file. """
     source = str(source_path)
 
-    destination_file: str = config['destination'] + source[len(config['source']):]
+    destination_file: str = config.destination + source[len(config.source):]
     destination_path = Path(destination_file)
 
     destination_parent = destination_path.parent
@@ -34,9 +34,9 @@ def link_missing_file(source_path: Path, config: dict) -> None:
 
 
 def main():
-    config = load_config()
+    config = AppConfig.load_from_yaml()
 
-    source: str = config.get('source', '')
+    source: str = config.source
     print(f'search in {source}')
 
     source_path = Path(source)
@@ -45,7 +45,7 @@ def main():
         return
 
     # Regex for exclusions
-    excludes: str = config.get('excludes', '')
+    excludes: str = config.excludes
     exclude_pattern = re.compile(f'{excludes}')
 
     for source_file in source_path.rglob('*'):

@@ -1,75 +1,35 @@
 #!/usr/bin/env python
 
 import logging
-import os
 import sys
-import yaml
 
 from pathlib import Path
 
 from Syncthing.Syncthing import Syncthing
 from Syncthing.Syncthing import syncthing_factory
 from Syncthing.SyncthingException import SyncthingException
-
-
-def load_config(config_path: str = '/config/config.yaml') -> dict | None:
-    """ Load configuration and check if minimum requirements are met """
-    try:
-        with open(config_path, 'r', encoding='utf-8') as file:
-            config_data = yaml.safe_load(file)
-
-        if config_data is None:
-            raise Exception('Configuration is empty.')
-
-        if 'source' not in config_data:
-            config_data['source'] = '/files/source/'
-        if 'destination' not in config_data:
-            config_data['destination'] = '/files/destination/'
-        if 'filters' not in config_data:
-            config_data['filters'] = 'ItemFinished'
-
-        return config_data
-    except FileNotFoundError:
-        print(f'Fehler: Die Konfigurationsdatei "{config_path}" wurde nicht gefunden.')
-        return None
-    except yaml.YAMLError as yamlError:
-        print(f'Fehler beim Parsen der YAML-Datei: {yamlError}')
-        return None
-
+from AppConfig import AppConfig
 
 class Main:
-    _logger: logging.Logger
-    _key: str
-    _config: dict
+    logger: logging.Logger
+    config: AppConfig
 
     def __init__(self):
-        self.prepare_logger()
-        self.config = load_config()
-        self.key = self.get_api_key()
+        self.logger = self.prepare_logger()
+        self.config = AppConfig.load_from_yaml()
 
-        filters: list[str] | None = None
-        if self.config.get('filters', '') != '':
-            filters = self.config['filters'].split(',')
-
-        syncthing = syncthing_factory()
+        syncthing = syncthing_factory(self.config.key)
         self.check_connection(syncthing)
+        self.loop_events(syncthing)
 
-        self.loop_events(syncthing, filters)
-
-    def prepare_logger(self) -> None:
+    @staticmethod
+    def prepare_logger() -> logging.Logger:
         logging.basicConfig(
             level=logging.INFO,
             format='%(asctime)s - %(levelname)s - %(message)s',
             stream=sys.stderr  # stderr is unbuffered!
         )
-        self._logger = logging.getLogger(__name__)
-
-    @staticmethod
-    def get_api_key() -> str:
-        key: str = os.getenv('SYNCTHING_API_KEY', '')
-        if key == '':
-            raise Exception('No API key found.')
-        return key
+        return logging.getLogger(__name__)
 
     @staticmethod
     def check_connection(syncthing: Syncthing) -> None:
@@ -85,21 +45,21 @@ class Main:
                 print(e)
             exit(1)
 
-    def loop_events(self, syncthing: Syncthing, filters: list[str]) -> None:
-        self._logger.info('Waiting for events')
+    def loop_events(self, syncthing: Syncthing) -> None:
+        self.logger.info('Waiting for events')
         last_seen_id: int | None = None
         while True:
             if last_seen_id:
-                event_stream = syncthing.events(limit=10, filters=filters, last_seen_id=last_seen_id)
+                event_stream = syncthing.events(limit=10, filters=self.config.filters, last_seen_id=last_seen_id)
             else:
-                event_stream = syncthing.events(limit=10, filters=filters)
+                event_stream = syncthing.events(limit=10, filters=self.config.filters)
 
             try:
                 for event in event_stream:
                     self.process_event(syncthing, event)
                     last_seen_id = event['id']
             except SyncthingException:
-                last_seen_id = event_stream.last_seen_id
+                continue
             except KeyboardInterrupt:
                 event_stream.stop()
                 print('bye bye')
@@ -119,19 +79,19 @@ class Main:
 
         source_path = Path(source_file)
         if not source_path.exists():
-            self._logger.info(f'Ignoring event for {source_file} because it does not exist.')
+            self.logger.info(f'Ignoring event for {source_file} because it does not exist.')
             return
-        if not source_file.startswith(self.config['source']):
-            self._logger.info(f'Ignoring event for {source_file} because it does not start with {self.config["source"]}.')
+        if not source_file.startswith(self.config.source):
+            self.logger.info(f'Ignoring event for {source_file} because it does not start with {self.config.source}.')
             return
 
-        destination_file: str = self.config['destination'] + source_file[len(self.config['source']):]
+        destination_file: str = self.config.destination + source_file[len(self.config.source):]
         destination_path = Path(destination_file)
 
         destination_parent = destination_path.parent
         if not destination_parent.exists():
             destination_parent.mkdir(parents=True, exist_ok=True)
-            self._logger.info(f'Created parent directory {destination_parent} for {destination_file}.')
+            self.logger.info(f'Created parent directory {destination_parent} for {destination_file}.')
 
         if destination_path.exists():
             # we don't want to overwrite existing files
@@ -139,17 +99,16 @@ class Main:
 
         try:
             destination_path.hardlink_to(source_file)
-            self._logger.info(f'Linked {source_file} to {destination_file}')
+            self.logger.info(f'Linked {source_file} to {destination_file}')
         except FileExistsError:
             return
         except OSError as e:
-            self._logger.error(f'Error linking {source_file} to {destination_file}: {e}')
+            self.logger.error(f'Error linking {source_file} to {destination_file}: {e}')
             return
 
 if __name__ == '__main__':
     Main()
 
 __all__ = [
-    'load_config',
     'Main'
 ]
