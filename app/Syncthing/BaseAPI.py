@@ -3,6 +3,8 @@ import json
 import logging
 import requests
 
+from requests import Response
+
 from .SyncthingException import SyncthingException
 
 DEFAULT_TIMEOUT = 10
@@ -47,7 +49,7 @@ class BaseAPI(object):
         params: dict | None = None,
         return_response: bool = False,
         raw_exceptions: bool = False
-    ) -> requests.Response | int | str | dict | list:
+    ) -> Response | int | str | dict | list:
         endpoint = self.prefix + endpoint
         return self._request('GET', endpoint, data, headers, params, return_response, raw_exceptions)
 
@@ -59,7 +61,7 @@ class BaseAPI(object):
         params: dict | None = None,
         return_response: bool = False,
         raw_exceptions: bool = False
-    ) -> requests.Response | int | str | dict | list:
+    ) -> Response | int | str | dict | list:
         endpoint = self.prefix + endpoint
         return self._request('POST', endpoint, data, headers, params, return_response, raw_exceptions)
 
@@ -71,7 +73,7 @@ class BaseAPI(object):
         params: dict | None = None,
         return_response: bool = False,
         raw_exceptions: bool = False
-    ) -> requests.Response | int | str | dict | list:
+    ) -> Response | int | str | dict | list:
         endpoint = self.prefix + endpoint
         return self._request('PUT', endpoint, data, headers, params, return_response, raw_exceptions)
 
@@ -83,7 +85,7 @@ class BaseAPI(object):
         params: dict | None = None,
         return_response: bool = False,
         raw_exceptions: bool = False
-    ) -> requests.Response | int | str | dict | list:
+    ) -> Response | int | str | dict | list:
         endpoint = self.prefix + endpoint
         return self._request('DELETE', endpoint, data, headers, params, return_response, raw_exceptions)
 
@@ -96,7 +98,7 @@ class BaseAPI(object):
         params: dict | None = None,
         return_response: bool = False,
         raw_exceptions: bool = False
-    ) -> requests.Response | int | str | dict | list:
+    ) -> Response | int | str | dict | list:
         method = method.upper()
 
         endpoint = self._base_url.format(endpoint=endpoint)
