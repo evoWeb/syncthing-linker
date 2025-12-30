@@ -27,7 +27,7 @@ def check_service_config(config: ServiceConfig, logger: logging.Logger) -> None:
     if sync_errors:
         for e in sync_errors:
             logger.error(e)
-        exit(1)
+        raise RuntimeError('Accessing Syncthing API failed.')
 
 def get_source_path_for_event(event: dict, config: Config, database: Database) -> Path | None:
     data: dict = event.get('data', {})
