@@ -133,7 +133,7 @@ class BaseAPI:
         except requests.RequestException as e:
             if raw_exceptions:
                 raise e
-            raise SyncthingException('http request error', e)
+            raise SyncthingException('http request error') from e
 
         else:
             if return_response:
