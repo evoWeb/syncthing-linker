@@ -92,8 +92,8 @@ class System(BaseAPI):
             params = {'current': path}
         return self.get('browse', params=params)
 
-    # DEPRECATED
     def config(self) -> dict:
+        warnings.warn('System.config() is deprecated', DeprecationWarning, stacklevel=2)
         """ Deprecated since the version v1.12.0: This endpoint still works as before but is
             deprecated. Use /rest/config instead.
 
@@ -113,8 +113,8 @@ class System(BaseAPI):
         """
         return self.get('config')
 
-    # DEPRECATED
     def set_config(self, config: dict, and_restart = False) -> None:
+        warnings.warn('System.set_config() is deprecated', DeprecationWarning, stacklevel=2)
         """ Deprecated since the version v1.12.0: This endpoint still works as before but is
             deprecated. Use Config Endpoints instead.
 
@@ -132,8 +132,8 @@ class System(BaseAPI):
         if and_restart:
             self.restart()
 
-    # DEPRECATED
     def config_insync(self) -> bool:
+        warnings.warn('System.config_insync() is deprecated', DeprecationWarning, stacklevel=2)
         """ Deprecated since the version v1.12.0: This endpoint still works as before but is
             deprecated. Use /rest/config/restart-required instead.
 

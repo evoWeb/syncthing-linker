@@ -87,7 +87,7 @@ class Syncthing:
             host=os.getenv('SYNCTHING_HOST', '127.0.0.1'),
             port=os.getenv('SYNCTHING_PORT', 8384),
             timeout=10,
-            is_https=bool(int(os.getenv('SYNCTHING_HTTPS', 0))),
+            is_https=os.getenv('SYNCTHING_HTTPS', 0) == 1,
             ssl_cert_file=os.getenv('SYNCTHING_CERT_FILE')
         )
 

@@ -1,3 +1,5 @@
+import warnings
+
 from .base_api import BaseAPI
 
 
@@ -9,8 +11,8 @@ class Debug(BaseAPI):
 
     prefix = '/rest/debug/'
 
-    # DEPRECATED
     def cpuprof(self) -> dict:
+        warnings.warn('Debug.cpuprof() is deprecated', DeprecationWarning, stacklevel=2)
         """ Used to capture a profile of what Syncthing is doing on the CPU. See Profiling.
 
             >>> s = Syncthing.create_instance().debug
@@ -29,8 +31,8 @@ class Debug(BaseAPI):
         """
         return self.get('cpuprof')
 
-    # DEPRECATED
     def heapprof(self) -> dict:
+        warnings.warn('Debug.heapprof() is deprecated', DeprecationWarning, stacklevel=2)
         """ Used to capture a profile of what Syncthing is doing with the heap memory. See Profiling.
 
             >>> s = Syncthing.create_instance().system
