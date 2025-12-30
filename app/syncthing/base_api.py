@@ -143,14 +143,10 @@ class BaseAPI:
                 self.logger.error(f'{response.status_code} {response.reason} ({response.url}): {response.text}')
                 return response
 
-            if 'json' in response.headers.get('Content-Type', 'text/plain').lower():
+            try:
                 json_data = response.json()
-            else:
-                content = response.content.decode('utf-8')
-                if content and content[0] == '{' and content[-1] == '}':
-                    json_data = json.loads(content)
-                else:
-                    return content
+            except json.JSONDecodeError:
+                return response.content.decode('utf-8')
 
             if isinstance(json_data, dict) and json_data.get('error'):
                 api_err = json_data.get('error')
