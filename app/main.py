@@ -14,7 +14,7 @@ from syncthing.service_config import ServiceConfig
 from syncthing.syncthing_exception import SyncthingException
 from app_config import AppConfig
 
-def check_service_config(config: ServiceConfig) -> None:
+def check_service_config(config: ServiceConfig, logger: logging.Logger) -> None:
     """ Checks the connection to the Syncthing API """
     system: System = System(config)
 
@@ -24,7 +24,7 @@ def check_service_config(config: ServiceConfig) -> None:
 
     if sync_errors:
         for e in sync_errors:
-            print(e)
+            logger.error(e)
         exit(1)
 
 def prepare_logger() -> logging.Logger:
@@ -59,7 +59,7 @@ def process_event(event: dict, app_config: AppConfig, config: Config, database: 
         logger.info(f'Ignoring event for {source_file} because it does not start with {app_config.source}.')
         return
     if app_config.excludes.match(str(source_file)):
-        print(f'Ignoring {source_file} because it matches the exclusion pattern')
+        logger.info(f'Ignoring {source_file} because it matches the exclusion pattern')
         return
 
     destination_path = Path(app_config.destination) / source_path.relative_to(app_config.source)
@@ -86,6 +86,7 @@ def process_event(event: dict, app_config: AppConfig, config: Config, database: 
 def main():
     logger = prepare_logger()
     app_config = AppConfig.load_from_yaml()
+    check_service_config(app_config, logger)
     config = Config(app_config)
     database = Database(app_config)
     last_seen_id: int= 0

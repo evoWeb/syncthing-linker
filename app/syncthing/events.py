@@ -15,15 +15,14 @@ class Events(BaseAPI):
         Syncthing provides a simple long polling interface for exposing events
         from the core utility towards a GUI.
 
-        .. code-block:: python
+        >>> l = logging.Logger()
+        >>> c = ServiceConfig(...)
+        >>> event_stream = Events(c, limit=5)
 
-           syncthing = Syncthing()
-           event_stream = syncthing.events(limit=5)
-
-           for event in event_stream:
-               print(event)
-               if event_stream.count > 10:
-                   del event_stream
+        >>> for event in event_stream:
+        >>>    l.info(event)
+        >>>    if event_stream.count > 10:
+        >>>        del event_stream
     """
 
     prefix: str = '/rest/'
