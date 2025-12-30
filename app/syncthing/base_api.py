@@ -2,6 +2,7 @@ import os
 import json
 import logging
 import requests
+import urllib3
 
 from requests import Response
 
@@ -47,44 +48,36 @@ class BaseAPI:
         endpoint: str,
         data: dict | str | None = None,
         headers: dict | None = None,
-        params: dict | None = None,
-        return_response: bool = False,
-        raw_exceptions: bool = False
+        params: dict | None = None
     ) -> Response | int | str | dict | list:
-        return self._request('GET', self.prefix + endpoint, data, headers, params, return_response, raw_exceptions)
+        return self._request('GET', self.prefix + endpoint, data, headers, params)
 
     def post(
         self,
         endpoint: str,
         data: dict | str | None = None,
         headers: dict | None = None,
-        params: dict | None = None,
-        return_response: bool = False,
-        raw_exceptions: bool = False
+        params: dict | None = None
     ) -> Response | int | str | dict | list:
-        return self._request('POST', self.prefix + endpoint, data, headers, params, return_response, raw_exceptions)
+        return self._request('POST', self.prefix + endpoint, data, headers, params)
 
     def put(
         self,
         endpoint: str,
         data: dict | str | None = None,
         headers: dict | None = None,
-        params: dict | None = None,
-        return_response: bool = False,
-        raw_exceptions: bool = False
+        params: dict | None = None
     ) -> Response | int | str | dict | list:
-        return self._request('PUT', self.prefix + endpoint, data, headers, params, return_response, raw_exceptions)
+        return self._request('PUT', self.prefix + endpoint, data, headers, params)
 
     def delete(
         self,
         endpoint: str,
         data: dict | str | None = None,
         headers: dict | None = None,
-        params: dict | None = None,
-        return_response: bool = False,
-        raw_exceptions: bool = False
+        params: dict | None = None
     ) -> Response | int | str | dict | list:
-        return self._request('DELETE', self.prefix + endpoint, data, headers, params, return_response, raw_exceptions)
+        return self._request('DELETE', self.prefix + endpoint, data, headers, params)
 
     def _request(
         self,
@@ -92,10 +85,38 @@ class BaseAPI:
         endpoint: str,
         data: dict | str | None = None,
         headers: dict | None = None,
-        params: dict | None = None,
-        return_response: bool = False,
-        raw_exceptions: bool = False
+        params: dict | None = None
     ) -> Response | int | str | dict | list:
+        try:
+            response = self.raw_request(method, endpoint, data, headers, params)
+            response.raise_for_status()
+
+        except requests.RequestException as e:
+            raise SyncthingException('HTTP request error') from e
+
+        else:
+            if response.status_code != requests.codes.ok:
+                self.logger.error(f'{response.status_code} {response.reason} ({response.url}): {response.text}')
+                return response
+
+            try:
+                json_data = response.json()
+            except json.JSONDecodeError:
+                return response.content.decode('utf-8')
+
+            if isinstance(json_data, dict) and json_data.get('error'):
+                api_err = json_data.get('error')
+                raise SyncthingException(f'Response contains the error {api_err}')
+            return json_data
+
+    def raw_request(
+        self,
+        method: str,
+        endpoint: str,
+        data: dict | str | None = None,
+        headers: dict | None = None,
+        params: dict | None = None
+    ) -> Response:
         method = method.upper()
 
         endpoint = self.url + endpoint
@@ -117,7 +138,7 @@ class BaseAPI:
 
             headers.update(self._headers)
 
-            response = requests.request(
+            return requests.request(
                 method,
                 endpoint,
                 data=json.dumps(data),
@@ -127,31 +148,8 @@ class BaseAPI:
                 headers=headers
             )
 
-            if not return_response:
-                response.raise_for_status()
-
         except requests.RequestException as e:
-            if raw_exceptions:
-                raise e
-            raise SyncthingException('http request error') from e
-
-        else:
-            if return_response:
-                return response
-
-            if response.status_code != requests.codes.ok:
-                self.logger.error(f'{response.status_code} {response.reason} ({response.url}): {response.text}')
-                return response
-
-            try:
-                json_data = response.json()
-            except json.JSONDecodeError:
-                return response.content.decode('utf-8')
-
-            if json_data.get('error'):
-                api_err = json_data.get('error')
-                raise SyncthingException(f'Response contains the error {api_err}')
-            return json_data
+            raise SyncthingException('HTTP request error') from e
 
 __all__ = [
     'DEFAULT_TIMEOUT',

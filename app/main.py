@@ -2,6 +2,7 @@
 
 import logging
 import sys
+import time
 
 from pathlib import Path
 
@@ -35,7 +36,8 @@ def check_connection(syncthing: Syncthing) -> None:
 def loop_events(syncthing: Syncthing, config: AppConfig, logger: logging.Logger) -> None:
     logger.info('Waiting for events')
     last_seen_id: int | None = None
-    while True:
+    healthy = True
+    while healthy:
         if last_seen_id:
             event_stream = syncthing.events(filters=config.filters, last_seen_id=last_seen_id)
         else:
@@ -46,12 +48,13 @@ def loop_events(syncthing: Syncthing, config: AppConfig, logger: logging.Logger)
                 process_event(syncthing, event, config, logger)
                 last_seen_id = event.get('id')
         except SyncthingException:
+            time.sleep(5)
             continue
         except KeyboardInterrupt:
             del event_stream
             print("\r", end='')
             logger.info('Stop waiting for events')
-            exit(0)
+            healthy = False
 
 def process_event(syncthing: Syncthing, event: dict, config: AppConfig, logger: logging.Logger) -> None:
     data: dict = event.get('data', {})
@@ -61,7 +64,7 @@ def process_event(syncthing: Syncthing, event: dict, config: AppConfig, logger: 
     try:
         folder: dict = syncthing.config.folder(data.get('folder'))
         file: dict = syncthing.database.file(data.get('folder'), data.get('item'))
-        source_path: Path = Path(folder.get('path')) / file.get('local').get('name')
+        source_path: Path = Path(folder.get('path')) / file.get('local', {}).get('name')
         source_file: str = str(source_path)
     except KeyError:
         return

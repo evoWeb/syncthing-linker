@@ -17,7 +17,7 @@ class Cluster(BaseAPI):
             Args:
                 device (str): Device ID.
         """
-        response = self.delete('devices', params={'device': device}, return_response=True)
+        response = self.raw_request('delete', 'devices', params={'device': device})
         error = response.text or None
         return {'success': response.status_code == requests.codes.ok, 'error': error}
 
@@ -40,7 +40,7 @@ class Cluster(BaseAPI):
             Returns:
                 dict: with keys ``success`` and ``error``.
         """
-        response = self.delete('devices', params={'folder': folder, 'device': device}, return_response=True)
+        response = self.raw_request('delete', 'devices', params={'folder': folder, 'device': device})
         error = response.text or None
         return {'success': response.status_code == requests.codes.ok, 'error': error}
 

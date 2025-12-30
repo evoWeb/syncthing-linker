@@ -1,5 +1,5 @@
-from requests.exceptions import Timeout
-from urllib3.exceptions import TimeoutError
+import requests
+import urllib3
 from typing import Generator
 
 from .base_api import BaseAPI
@@ -106,10 +106,10 @@ class Events(BaseAPI):
                 params['events'] = ','.join(filters)
 
             try:
-                data = self.get(using_url, params=params, raw_exceptions=True)
-            except (Timeout, TimeoutError):
+                data = self.get(using_url, params=params)
+            except (requests.exceptions.Timeout, requests.exceptions.ReadTimeout, urllib3.exceptions.TimeoutError) as e:
                 # swallow timeout errors for long polling
-                data = None
+                raise SyncthingException('Timeout while fetching new events') from e
             except Exception as e:
                 raise SyncthingException('Get new event failed') from e
 

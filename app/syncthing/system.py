@@ -141,9 +141,7 @@ class System(BaseAPI):
             the same as that on disk.
         """
         status = self.get('config/insync').get('configInSync', False)
-        if status is None:
-            status = False
-        return status
+        return bool(status)
 
     def connections(self) -> dict:
         """ Returns the list of configured devices and some metadata associated with them.
@@ -255,7 +253,7 @@ class System(BaseAPI):
             Returns:
                 dict: with keys ``success`` and ``error``.
         """
-        response = self.post('pause', params={'device': device}, return_response=True)
+        response = self.raw_request('post', 'pause', params={'device': device})
         error = response.text or None
         return {'success': response.status_code == requests.codes.ok, 'error': error}
 
@@ -307,9 +305,9 @@ class System(BaseAPI):
                 dict: with keys ``success`` and ``error``.
         """
         if device is None:
-            resp = self.post('resume', return_response=True)
+            resp = self.raw_request('post', 'resume')
         else:
-            resp = self.post('resume', params={'device': device}, return_response=True)
+            resp = self.raw_request('post', 'resume', params={'device': device})
 
         error = resp.text
         if not error:
