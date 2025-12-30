@@ -2,15 +2,18 @@ import datetime
 import requests
 import warnings
 
-from collections import namedtuple
+from dataclasses import dataclass
 from dateutil.parser import parse as dateutil_parser
 
 from .base_api import BaseAPI
 from .syncthing_exception import SyncthingException
 
 
-ErrorEvent = namedtuple('ErrorEvent', 'when, message')
-""" tuple[datetime.datetime,str]: used to process error lists more easily, instead of by two-key dictionaries. """
+@dataclass
+class ErrorEvent:
+    """ used to process error lists more easily, instead of by two-key dictionaries. """
+    when: datetime.datetime
+    message: str
 
 
 def keys_to_datetime(obj: dict | None, *keys) -> dict:
@@ -25,16 +28,16 @@ def keys_to_datetime(obj: dict | None, *keys) -> dict:
         True
         >>> keys_to_datetime({})
         {}
-        >>> a = {}
+        >>> obj = {}
         >>> id(keys_to_datetime(a)) == id(a)
         True
         >>> a = {'one': '2016-06-06T19:41:43.039284',
                  'two': '2016-06-06T19:41:43.039284'}
-        >>> keys_to_datetime(a) == a
+        >>> keys_to_datetime(obj) == a
         True
-        >>> keys_to_datetime(a, 'one')['one']
+        >>> keys_to_datetime(obj, 'one')['one']
         datetime.datetime(2016, 6, 6, 19, 41, 43, 39284)
-        >>> keys_to_datetime(a, 'one')['two']
+        >>> keys_to_datetime(obj, 'one')['two']
         '2016-06-06T19:41:43.039284'
     """
     if not keys:
@@ -55,7 +58,7 @@ def parse_datetime(date_string: str | None, **kwargs) -> datetime.datetime | Non
         Args:
             date_string (str): string to be formatted.
 
-        ``**kwargs`` is passed directly to :func:`.dateutil_parser`.
+        ``**kwargs`` is passed directly to:func:`.dateutil_parser`.
     """
     if not date_string:
         return None
@@ -185,7 +188,7 @@ class System(BaseAPI):
         """ Returns the list of recent errors.
 
             Returns:
-                list: of :obj:`.ErrorEvent` tuples.
+                list: of :obj:`.ErrorEvent` instances.
         """
         ret_errs = list()
         errors = self.get('error').get('errors', None) or list()
