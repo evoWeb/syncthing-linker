@@ -79,8 +79,8 @@ def process_event(syncthing: Syncthing, event: dict, config: AppConfig, logger: 
         print(f'Ignoring {source_file} because it matches the exclusion pattern')
         return
 
-    destination_file: str = config.destination + source_file[len(config.source):]
-    destination_path = Path(destination_file)
+    destination_path = Path(config.destination) / source_path.relative_to(config.source)
+    destination_file: str = str(destination_path)
 
     destination_parent = destination_path.parent
     if not destination_parent.exists():

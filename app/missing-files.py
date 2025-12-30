@@ -9,8 +9,8 @@ def link_missing_file(source_path: Path, config: AppConfig) -> None:
     """ Recreates the directory structure in 'destination' and hardlinks the file. """
     source = str(source_path)
 
-    destination_file: str = config.destination + source[len(config.source):]
-    destination_path = Path(destination_file)
+    destination_path = Path(config.destination) / source_path.relative_to(config.source)
+    destination_file: str = str(destination_path)
 
     destination_parent = destination_path.parent
     if not destination_parent.exists():
