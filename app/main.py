@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import logging
-import sys
 import time
 
 from pathlib import Path
@@ -13,6 +12,9 @@ from syncthing.system import System
 from syncthing.service_config import ServiceConfig
 from syncthing.syncthing_exception import SyncthingException
 from app_config import AppConfig
+from utilities import link_source_to_destination
+from utilities import prepare_logger
+from utilities import source_path_is_qualified
 
 def check_service_config(config: ServiceConfig, logger: logging.Logger) -> None:
     """ Checks the connection to the Syncthing API """
@@ -27,61 +29,28 @@ def check_service_config(config: ServiceConfig, logger: logging.Logger) -> None:
             logger.error(e)
         exit(1)
 
-def prepare_logger() -> logging.Logger:
-    """ Prepares the logger for the application. """
-    logging.basicConfig(
-        level=logging.INFO,
-        format='%(asctime)s - %(levelname)s - %(message)s',
-        stream=sys.stderr  # stderr is unbuffered!
-    )
-    return logging.getLogger(__name__)
-
-def process_event(event: dict, app_config: AppConfig, config: Config, database: Database, logger: logging.Logger) -> None:
+def get_source_path_for_event(event: dict, config: Config, database: Database) -> Path | None:
     data: dict = event.get('data', {})
     if data.get('error') or (not data.get('folder') and not data.get('item')):
-        return
+        return None
 
     try:
         folder: dict = config.folder(data.get('folder'))
         file: dict = database.file(data.get('folder'), data.get('item'))
         source_path: Path = Path(folder.get('path')) / file.get('local', {}).get('name')
-        source_file: str = str(source_path)
     except KeyError:
-        return
+        return None
 
-    if not source_path.exists():
-        logger.info(f'Ignoring event for {source_file} because it does not exist.')
-        return
-    if source_path.is_dir():
-        logger.info(f'Ignoring event for {source_file} because it\'s a folder.')
-        return
-    if not source_file.startswith(app_config.source):
-        logger.info(f'Ignoring event for {source_file} because it does not start with {app_config.source}.')
-        return
-    if app_config.excludes.match(str(source_file)):
-        logger.info(f'Ignoring {source_file} because it matches the exclusion pattern')
+    return source_path
+
+def process_event(event: dict, app_config: AppConfig, config: Config, database: Database, logger: logging.Logger) -> None:
+    source_path = get_source_path_for_event(event, config, database)
+
+    if not source_path_is_qualified(source_path, app_config, logger):
         return
 
     destination_path = Path(app_config.destination) / source_path.relative_to(app_config.source)
-    destination_file: str = str(destination_path)
-
-    destination_parent = destination_path.parent
-    if not destination_parent.exists():
-        destination_parent.mkdir(parents=True, exist_ok=True)
-        logger.info(f'Created parent directory {destination_parent} for {destination_file}.')
-
-    if destination_path.exists():
-        # we don't want to overwrite existing files
-        return
-
-    try:
-        destination_path.hardlink_to(source_file)
-        logger.info(f'Linked {source_file} to {destination_file}')
-    except FileExistsError:
-        return
-    except OSError as e:
-        logger.error(f'Error linking {source_file} to {destination_file}: {e}')
-        return
+    link_source_to_destination(source_path, destination_path, logger)
 
 def main():
     logger = prepare_logger()
@@ -102,7 +71,6 @@ def main():
                 last_seen_id = event.get('id')
         except SyncthingException:
             time.sleep(5)
-            continue
         except KeyboardInterrupt:
             del event_stream
             print("\r", end='')
