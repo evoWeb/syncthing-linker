@@ -60,7 +60,7 @@ class Main:
             except SyncthingException:
                 continue
             except KeyboardInterrupt:
-                event_stream.stop()
+                del event_stream
                 print('bye bye')
                 exit(0)
 
@@ -72,11 +72,11 @@ class Main:
         try:
             folder: dict = syncthing.config.folder(data['folder'])
             file: dict = syncthing.database.file(data['folder'], data['item'])
-            source_file = folder['path'].rstrip('/') + '/' + file['local']['name']
+            source_path: Path = Path(folder['path']) / file['local']['name']
+            source_file: str = str(source_path)
         except KeyError:
             return
 
-        source_path = Path(source_file)
         if not source_path.exists():
             self.logger.info(f'Ignoring event for {source_file} because it does not exist.')
             return

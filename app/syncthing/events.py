@@ -22,7 +22,7 @@ class Events(BaseAPI):
            for event in event_stream:
                print(event)
                if event_stream.count > 10:
-                   event_stream.stop()
+                   del event_stream
     """
 
     prefix: str = '/rest/'
@@ -46,9 +46,7 @@ class Events(BaseAPI):
         self._last_seen_id = last_seen_id or 0
         self._filters = filters
         self._limit = limit
-
         self._count = 0
-        self.blocking = True
 
     def events(
         self,
@@ -97,12 +95,8 @@ class Events(BaseAPI):
         if filters is None:
             filters = []
 
-        # reset the state if the loop was broken with `stop`
-        if not self.blocking:
-            self.blocking = True
-
         # block/long-poll for updates to the events api
-        while self.blocking:
+        while True:
             params: dict[str, str | int] = {
                 'since': self._last_seen_id,
                 'limit': limit,
@@ -135,10 +129,6 @@ class Events(BaseAPI):
         """
         for event in self.events('events/disk', None, self._limit):
             yield event
-
-    def stop(self) -> None:
-        """ Breaks the while-loop while the generator is polling for event changes. """
-        self.blocking = False
 
     @property
     def count(self) -> int:

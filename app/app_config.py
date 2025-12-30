@@ -15,7 +15,7 @@ class AppConfig:
 
     def __post_init__(self):
         self.key: str = os.getenv('SYNCTHING_API_KEY', '')
-        if self.key == '':
+        if not self.key:
             raise Exception('No API key found.')
 
     @classmethod
