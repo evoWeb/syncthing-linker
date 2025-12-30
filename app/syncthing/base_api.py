@@ -34,7 +34,7 @@ class BaseAPI:
         self.timeout = timeout
         self.is_https = is_https
         self.ssl_cert_file = ssl_cert_file
-        self.verify = True if ssl_cert_file or is_https else False
+        self.verify = bool(ssl_cert_file or is_https)
         self._headers = {
             'X-API-Key': api_key
         }

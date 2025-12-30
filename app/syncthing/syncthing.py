@@ -82,12 +82,14 @@ class Syncthing(object):
 
     @classmethod
     def create_instance(cls, key: str = None):
-        key = key if key != '' else os.getenv('SYNCTHING_API_KEY')
-        host = os.getenv('SYNCTHING_HOST', '127.0.0.1')
-        port = os.getenv('SYNCTHING_PORT', 8384)
-        is_https = bool(int(os.getenv('SYNCTHING_HTTPS', '0')))
-        ssk_cert_file = os.getenv('SYNCTHING_CERT_FILE')
-        return Syncthing(key, host, port, 10, is_https, ssk_cert_file)
+        return Syncthing(
+            api_key=key if key != '' else os.getenv('SYNCTHING_API_KEY'),
+            host=os.getenv('SYNCTHING_HOST', '127.0.0.1'),
+            port=os.getenv('SYNCTHING_PORT', 8384),
+            timeout=10,
+            is_https=bool(int(os.getenv('SYNCTHING_HTTPS', 0))),
+            ssl_cert_file=os.getenv('SYNCTHING_CERT_FILE')
+        )
 
 __all__ = [
     'Syncthing'
