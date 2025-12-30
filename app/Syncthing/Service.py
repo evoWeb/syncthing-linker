@@ -23,7 +23,7 @@ class Service(BaseAPI):
         """ Returns a list of canonicalized localization codes, as picked up from the
             Accept-Language header sent by the browser.
 
-            >>> s = syncthing_factory()
+            >>> s = Syncthing.create_instance()
             >>> len(s.service.lang())
             1
             >>> s.service.lang()[0]
@@ -46,7 +46,7 @@ class Service(BaseAPI):
             Args:
                 length (int): default ``32``.
 
-            >>> s = syncthing_factory()
+            >>> s = Syncthing.create_instance()
             >>> len(s.service.random_string())
             32
             >>> len(s.service.random_string(32))
@@ -69,7 +69,7 @@ class Service(BaseAPI):
     def report(self) -> dict:
         """ Returns the data sent in the anonymous usage report.
 
-            >>> s = syncthing_factory()
+            >>> s = Syncthing.create_instance()
             >>> report = s.service.report()
             >>> 'version' in report
             True

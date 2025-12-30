@@ -12,7 +12,7 @@ class Debug(BaseAPI):
     def cpuprof(self) -> dict:
         """ Used to capture a profile of what Syncthing is doing on the CPU. See Profiling.
 
-            >>> s = syncthing_factory().debug
+            >>> s = Syncthing.create_instance().debug
             >>> debug = s.debug()
             >>> debug
             ... #doctest: +ELLIPSIS
@@ -32,7 +32,7 @@ class Debug(BaseAPI):
     def heapprof(self) -> dict:
         """ Used to capture a profile of what Syncthing is doing with the heap memory. See Profiling.
 
-            >>> s = syncthing_factory().system
+            >>> s = Syncthing.create_instance().system
             >>> debug = s.debug()
             >>> debug
             ... #doctest: +ELLIPSIS

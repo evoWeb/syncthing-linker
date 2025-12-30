@@ -6,7 +6,6 @@ import sys
 from pathlib import Path
 
 from Syncthing.Syncthing import Syncthing
-from Syncthing.Syncthing import syncthing_factory
 from Syncthing.SyncthingException import SyncthingException
 from AppConfig import AppConfig
 
@@ -18,7 +17,7 @@ class Main:
         self.logger = self.prepare_logger()
         self.config = AppConfig.load_from_yaml()
 
-        syncthing = syncthing_factory(self.config.key)
+        syncthing = Syncthing.create_instance(self.config.key)
         self.check_connection(syncthing)
         self.loop_events(syncthing)
 

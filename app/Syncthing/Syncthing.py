@@ -18,15 +18,6 @@ from .Statistics import Statistics
 from .System import System
 
 
-def syncthing_factory(key: str = None):
-    key = key if key != '' else os.getenv('SYNCTHING_API_KEY')
-    host = os.getenv('SYNCTHING_HOST', '127.0.0.1')
-    port = os.getenv('SYNCTHING_PORT', 8384)
-    is_https = bool(int(os.getenv('SYNCTHING_HTTPS', '0')))
-    ssk_cert_file = os.getenv('SYNCTHING_CERT_FILE')
-    return Syncthing(key, host, port, 10, is_https, ssk_cert_file)
-
-
 class Syncthing(object):
     """ Default interface for interacting with Syncthing server instance.
 
@@ -89,9 +80,16 @@ class Syncthing(object):
         kw.update(kwargs)
         return Events(api_key=self._api_key, last_seen_id=last_seen_id, filters=filters, **kw)
 
+    @classmethod
+    def create_instance(cls, key: str = None):
+        key = key if key != '' else os.getenv('SYNCTHING_API_KEY')
+        host = os.getenv('SYNCTHING_HOST', '127.0.0.1')
+        port = os.getenv('SYNCTHING_PORT', 8384)
+        is_https = bool(int(os.getenv('SYNCTHING_HTTPS', '0')))
+        ssk_cert_file = os.getenv('SYNCTHING_CERT_FILE')
+        return Syncthing(key, host, port, 10, is_https, ssk_cert_file)
 
 __all__ = [
-    'syncthing_factory',
     'Syncthing'
 ]
 
