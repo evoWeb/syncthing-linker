@@ -143,3 +143,7 @@ class Events(BaseAPI):
     def __iter__(self) -> Generator[dict]:
         """ Helper interface for :obj:`._events` """
         yield from self.events('events', self._filters, self._limit)
+
+__all__ = [
+    'Events'
+]

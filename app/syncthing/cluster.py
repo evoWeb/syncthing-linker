@@ -54,3 +54,7 @@ class Cluster(BaseAPI):
             a specific remote device. Other offering devices are also omitted from the result.
         """
         return self.delete('folders')
+
+__all__ = [
+    'Cluster'
+]

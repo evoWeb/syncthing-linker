@@ -80,3 +80,7 @@ class Service(BaseAPI):
             True
         """
         return self.get('report')
+
+__all__ = [
+    'Service'
+]

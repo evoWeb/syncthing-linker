@@ -12,3 +12,7 @@ class Noauth(BaseAPI):
     def health(self) -> bool:
         """ Returns true if the server replies with a {"status": "OK"} object. """
         return self.get('health').get('status', '') == 'OK'
+
+__all__ = [
+    'Noauth'
+]
