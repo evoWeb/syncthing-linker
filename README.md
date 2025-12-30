@@ -8,7 +8,7 @@ ItemFinished event was fired.
 If the linker didn't run for a while and events where lost, there is a script to check all files in the source if it's
 also present in destination.
 
-By running `docker compose run -it syncthing-linker-linker python missing-files.py` you can run the missing files script
+By running `docker compose run -it syncthing-linker-linker python missing_files.py` you can run the missing files script
 on the host. For this to work, it's not necessary to have Syncthing running, but the syncthing-linker container must be
 running.
 

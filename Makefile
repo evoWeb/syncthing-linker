@@ -16,9 +16,9 @@ connect:
 	docker compose exec linker-development sh
 
 
-.PHONY: missing-files
-missing-files:
-	docker compose exec linker-development python missing-files.py
+.PHONY: missing_files
+missing_files:
+	docker compose exec linker-development python missing_files.py
 
 
 .PHONY: build
