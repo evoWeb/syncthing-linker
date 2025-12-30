@@ -30,7 +30,6 @@ def link_missing_file(source_path: Path, config: AppConfig) -> None:
         print(f'Error linking {source} to {destination_file}: {e}')
         return
 
-
 def main():
     config = AppConfig.load_from_yaml()
 

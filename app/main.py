@@ -9,111 +9,102 @@ from syncthing.syncthing import Syncthing
 from syncthing.syncthing_exception import SyncthingException
 from app_config import AppConfig
 
-class Main:
-    logger: logging.Logger
-    config: AppConfig
 
-    def __init__(self):
-        self.logger = self.prepare_logger()
-        self.config = AppConfig.load_from_yaml()
+def prepare_logger() -> logging.Logger:
+    """ Prepares the logger for the application. """
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(levelname)s - %(message)s',
+        stream=sys.stderr  # stderr is unbuffered!
+    )
+    return logging.getLogger(__name__)
 
-        syncthing = Syncthing.create_instance(self.config.key)
-        self.check_connection(syncthing)
-        self.loop_events(syncthing)
+def check_connection(syncthing: Syncthing) -> None:
+    """ Checks the connection to the Syncthing API """
+    syncthing.system.connections()
 
-    @staticmethod
-    def prepare_logger() -> logging.Logger:
-        logging.basicConfig(
-            level=logging.INFO,
-            format='%(asctime)s - %(levelname)s - %(message)s',
-            stream=sys.stderr  # stderr is unbuffered!
-        )
-        return logging.getLogger(__name__)
+    # supports GET/POST semantics
+    sync_errors = syncthing.system.errors()
+    syncthing.system.clear()
 
-    @staticmethod
-    def check_connection(syncthing: Syncthing) -> None:
-        """ Checks the connection to the Syncthing API """
-        syncthing.system.connections()
+    if sync_errors:
+        for e in sync_errors:
+            print(e)
+        exit(1)
 
-        # supports GET/POST semantics
-        sync_errors = syncthing.system.errors()
-        syncthing.system.clear()
-
-        if sync_errors:
-            for e in sync_errors:
-                print(e)
-            exit(1)
-
-    def loop_events(self, syncthing: Syncthing) -> None:
-        self.logger.info('Waiting for events')
-        last_seen_id: int | None = None
-        while True:
-            if last_seen_id:
-                event_stream = syncthing.events(filters=self.config.filters, last_seen_id=last_seen_id)
-            else:
-                event_stream = syncthing.events(filters=self.config.filters)
-
-            try:
-                for event in event_stream:
-                    self.process_event(syncthing, event)
-                    last_seen_id = event['id']
-            except SyncthingException:
-                continue
-            except KeyboardInterrupt:
-                del event_stream
-                print('bye bye')
-                exit(0)
-
-    def process_event(self, syncthing: Syncthing, event: dict) -> None:
-        data: dict = event.get('data', {})
-        if data.get('error', None) is not None or 'folder' not in data or 'item' not in data:
-            return
+def loop_events(syncthing: Syncthing, config: AppConfig, logger: logging.Logger) -> None:
+    logger.info('Waiting for events')
+    last_seen_id: int | None = None
+    while True:
+        if last_seen_id:
+            event_stream = syncthing.events(filters=config.filters, last_seen_id=last_seen_id)
+        else:
+            event_stream = syncthing.events(filters=config.filters)
 
         try:
-            folder: dict = syncthing.config.folder(data['folder'])
-            file: dict = syncthing.database.file(data['folder'], data['item'])
-            source_path: Path = Path(folder['path']) / file['local']['name']
-            source_file: str = str(source_path)
-        except KeyError:
-            return
+            for event in event_stream:
+                process_event(syncthing, event, config, logger)
+                last_seen_id = event['id']
+        except SyncthingException:
+            continue
+        except KeyboardInterrupt:
+            del event_stream
+            print('bye bye')
+            exit(0)
 
-        if not source_path.exists():
-            self.logger.info(f'Ignoring event for {source_file} because it does not exist.')
-            return
-        if source_path.is_dir():
-            self.logger.info(f'Ignoring event for {source_file} because it\'s a folder.')
-            return
-        if not source_file.startswith(self.config.source):
-            self.logger.info(f'Ignoring event for {source_file} because it does not start with {self.config.source}.')
-            return
-        if self.config.excludes.match(str(source_file)):
-            print(f'Ignoring {source_file} because it matches the exclusion pattern')
-            return
+def process_event(syncthing: Syncthing, event: dict, config: AppConfig, logger: logging.Logger) -> None:
+    data: dict = event.get('data', {})
+    if data.get('error', None) is not None or 'folder' not in data or 'item' not in data:
+        return
 
-        destination_file: str = self.config.destination + source_file[len(self.config.source):]
-        destination_path = Path(destination_file)
+    try:
+        folder: dict = syncthing.config.folder(data['folder'])
+        file: dict = syncthing.database.file(data['folder'], data['item'])
+        source_path: Path = Path(folder['path']) / file['local']['name']
+        source_file: str = str(source_path)
+    except KeyError:
+        return
 
-        destination_parent = destination_path.parent
-        if not destination_parent.exists():
-            destination_parent.mkdir(parents=True, exist_ok=True)
-            self.logger.info(f'Created parent directory {destination_parent} for {destination_file}.')
+    if not source_path.exists():
+        logger.info(f'Ignoring event for {source_file} because it does not exist.')
+        return
+    if source_path.is_dir():
+        logger.info(f'Ignoring event for {source_file} because it\'s a folder.')
+        return
+    if not source_file.startswith(config.source):
+        logger.info(f'Ignoring event for {source_file} because it does not start with {config.source}.')
+        return
+    if config.excludes.match(str(source_file)):
+        print(f'Ignoring {source_file} because it matches the exclusion pattern')
+        return
 
-        if destination_path.exists():
-            # we don't want to overwrite existing files
-            return
+    destination_file: str = config.destination + source_file[len(config.source):]
+    destination_path = Path(destination_file)
 
-        try:
-            destination_path.hardlink_to(source_file)
-            self.logger.info(f'Linked {source_file} to {destination_file}')
-        except FileExistsError:
-            return
-        except OSError as e:
-            self.logger.error(f'Error linking {source_file} to {destination_file}: {e}')
-            return
+    destination_parent = destination_path.parent
+    if not destination_parent.exists():
+        destination_parent.mkdir(parents=True, exist_ok=True)
+        logger.info(f'Created parent directory {destination_parent} for {destination_file}.')
+
+    if destination_path.exists():
+        # we don't want to overwrite existing files
+        return
+
+    try:
+        destination_path.hardlink_to(source_file)
+        logger.info(f'Linked {source_file} to {destination_file}')
+    except FileExistsError:
+        return
+    except OSError as e:
+        logger.error(f'Error linking {source_file} to {destination_file}: {e}')
+        return
+
+def main():
+    config = AppConfig.load_from_yaml()
+
+    syncthing = Syncthing.create_instance(config.key)
+    check_connection(syncthing)
+    loop_events(syncthing, config, prepare_logger())
 
 if __name__ == '__main__':
-    Main()
-
-__all__ = [
-    'Main'
-]
+    main()
