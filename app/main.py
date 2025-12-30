@@ -55,7 +55,7 @@ def loop_events(syncthing: Syncthing, config: AppConfig, logger: logging.Logger)
 
 def process_event(syncthing: Syncthing, event: dict, config: AppConfig, logger: logging.Logger) -> None:
     data: dict = event.get('data', {})
-    if data.get('error', None) is not None or 'folder' not in data or 'item' not in data:
+    if data.get('error') or (not data.get('folder') and not data.get('item')):
         return
 
     try:
