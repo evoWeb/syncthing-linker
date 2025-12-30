@@ -35,6 +35,10 @@ class AppConfig:
                 excludes=re.compile(str(config.get('excludes', '')))
             )
         except FileNotFoundError as e:
-            raise Exception(f'Fehler: Die Konfigurationsdatei "{config_path}" wurde nicht gefunden.') from e
+            raise Exception(f'Error: The configuration file \'{config_path}\' doesn\'t exists.') from e
         except yaml.YAMLError as yamlError:
-            raise Exception(f'Fehler beim Parsen der YAML-Datei: {config_path}') from yamlError
+            raise Exception(f'Error with parsing the YAML-file: \'{config_path}\'') from yamlError
+
+__all__ = [
+    'AppConfig'
+]
