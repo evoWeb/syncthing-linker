@@ -1,4 +1,5 @@
 import os
+import re
 import yaml
 
 from dataclasses import dataclass
@@ -8,7 +9,8 @@ class AppConfig:
     source: str
     destination: str
     filters: list[str]
-    excludes: str = ''
+    # Regex for exclusions
+    excludes: re.Pattern[str] = ''
     key: str = ''
 
     def __post_init__(self):
@@ -36,11 +38,13 @@ class AppConfig:
             if isinstance(config['filters'], str):
                 config['filters'] = config['filters'].split(',')
 
+            excludes: str = config.get('excludes', '')
+
             return AppConfig(
                 source=config.get('source'),
                 destination=config.get('destination'),
                 filters=config.get('filters', []),
-                excludes=config.get('excludes', '')
+                excludes=re.compile(f'{excludes}')
             )
         except FileNotFoundError:
             raise Exception(f'Fehler: Die Konfigurationsdatei "{config_path}" wurde nicht gefunden.')

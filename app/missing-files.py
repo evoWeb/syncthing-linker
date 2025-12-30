@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 
-import re
-
 from pathlib import Path
 
 from AppConfig import AppConfig
@@ -44,17 +42,13 @@ def main():
         print(f'Ignoring event for {source} because it does not exist.')
         return
 
-    # Regex for exclusions
-    excludes: str = config.excludes
-    exclude_pattern = re.compile(f'{excludes}')
-
     for source_file in source_path.rglob('*'):
         # Skip directories
         if source_file.is_dir():
             continue
 
         # Check exclusions
-        if exclude_pattern.match(str(source_file)):
+        if config.excludes.match(str(source_file)):
             print(f'Ignoring {source_file} because it matches the exclusion pattern')
             continue
 
