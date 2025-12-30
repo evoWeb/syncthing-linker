@@ -3,6 +3,7 @@ import urllib3
 from typing import Generator
 
 from .base_api import BaseAPI
+from .service_config import ServiceConfig
 from .syncthing_exception import SyncthingException
 
 
@@ -26,27 +27,19 @@ class Events(BaseAPI):
     """
 
     prefix: str = '/rest/'
+    _count: int = 0
 
     def __init__(
         self,
-        api_key: str,
-        last_seen_id: int = None,
+        config: ServiceConfig,
+        last_seen_id: int = 0,
         filters: list[str] = None,
         limit: int = 10,
-        *args,
-        **kwargs
     ):
-        if 'timeout' not in kwargs:
-            # increase our timeout to account for long polling.
-            # this will reduce the number of timed-out connections, which are
-            # swallowed by the library anyway
-            kwargs['timeout'] = 60.0  #seconds
-
-        super(Events, self).__init__(api_key, *args, **kwargs)
+        super(Events, self).__init__(config)
         self._last_seen_id = last_seen_id or 0
         self._filters = filters
         self._limit = limit
-        self._count = 0
 
     def events(
         self,

@@ -6,40 +6,31 @@ from urllib.parse import urljoin
 
 from requests import Response
 
+from .service_config import ServiceConfig
 from .syncthing_exception import SyncthingException
 
-
-DEFAULT_TIMEOUT = 10
 
 class BaseAPI:
     """ Placeholder for HTTP REST API URL prefix. """
 
     prefix = ''
 
-    def __init__(
-        self,
-        api_key: str,
-        host: str = 'localhost',
-        port: int = 8384,
-        timeout: int = DEFAULT_TIMEOUT,
-        is_https: bool = False,
-        ssl_cert_file: str | None = None
-    ):
-        if ssl_cert_file:
-            if not os.path.exists(ssl_cert_file):
-                raise SyncthingException(f'ssl_cert_file does not exist at location, {ssl_cert_file}')
+    def __init__(self, config: ServiceConfig):
+        if config.ssl_cert_file:
+            if not os.path.exists(config.ssl_cert_file):
+                raise SyncthingException(f'ssl_cert_file does not exist at location, {config.ssl_cert_file}')
 
-        self.api_key = api_key
-        self.host = host
-        self.port = port
-        self.timeout = timeout
-        self.is_https = is_https
-        self.ssl_cert_file = ssl_cert_file
-        self.verify = bool(ssl_cert_file or is_https)
+        self.api_key = config.api_key
+        self.host = config.host
+        self.port = config.port
+        self.timeout = config.timeout
+        self.is_https = config.is_https
+        self.ssl_cert_file = config.ssl_cert_file
+        self.verify = bool(config.ssl_cert_file or config.is_https)
         self._headers = {
-            'X-API-Key': api_key
+            'X-API-Key': config.api_key
         }
-        self.proto: str = 'https' if is_https else 'http'
+        self.proto: str = 'https' if config.is_https else 'http'
         self.url = f'{self.proto}://{self.host}:{self.port}'
         self.logger = logging.getLogger(__name__)
 
@@ -149,8 +140,3 @@ class BaseAPI:
 
         except requests.RequestException as e:
             raise SyncthingException('HTTP request error') from e
-
-__all__ = [
-    'DEFAULT_TIMEOUT',
-    'BaseAPI'
-]

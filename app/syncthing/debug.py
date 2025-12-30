@@ -15,18 +15,18 @@ class Debug(BaseAPI):
         warnings.warn('Debug.cpuprof() is deprecated', DeprecationWarning, stacklevel=2)
         """ Used to capture a profile of what Syncthing is doing on the CPU. See Profiling.
 
-            >>> s = Syncthing.create_instance().debug
-            >>> debug = s.debug()
-            >>> debug
+            >>> c = ServiceConfig(...)
+            >>> d = Debug(c)
+            >>> d
             ... #doctest: +ELLIPSIS
             {...}
-            >>> len(debug.keys())
+            >>> len(d.keys())
             2
-            >>> 'enabled' in debug and 'facilities' in debug
+            >>> 'enabled' in d and 'facilities' in d
             True
-            >>> isinstance(debug.get('enabled'), list) or debug.get('enabled') is None
+            >>> isinstance(d.get('enabled'), list) or d.get('enabled') is None
             True
-            >>> isinstance(debug.get('facilities'), dict)
+            >>> isinstance(d.get('facilities'), dict)
             True
         """
         return self.get('cpuprof')
@@ -35,18 +35,18 @@ class Debug(BaseAPI):
         warnings.warn('Debug.heapprof() is deprecated', DeprecationWarning, stacklevel=2)
         """ Used to capture a profile of what Syncthing is doing with the heap memory. See Profiling.
 
-            >>> s = Syncthing.create_instance().system
-            >>> debug = s.debug()
-            >>> debug
+            >>> c = ServiceConfig(...)
+            >>> d = Debug(c)
+            >>> d
             ... #doctest: +ELLIPSIS
             {...}
-            >>> len(debug.keys())
+            >>> len(d.keys())
             2
-            >>> 'enabled' in debug and 'facilities' in debug
+            >>> 'enabled' in d and 'facilities' in d
             True
-            >>> isinstance(debug.get('enabled'), list) or debug.get('enabled') is None
+            >>> isinstance(d.get('enabled'), list) or d.get('enabled') is None
             True
-            >>> isinstance(debug.get('facilities'), dict)
+            >>> isinstance(d.get('facilities'), dict)
             True
         """
         return self.get('heapprof')

@@ -99,7 +99,8 @@ class System(BaseAPI):
 
             Returns the current configuration.
 
-            >>> s = Syncthing.create_instance().system
+            >>> c = ServiceConfig(...)
+            >>> s = System(c)
             >>> config = s.config()
             >>> config
             ... # doctest: +ELLIPSIS
@@ -149,7 +150,8 @@ class System(BaseAPI):
             The connection types are tcp-client, tcp-server, relay-client, relay-server,
             quic-client and quic-server.
 
-            >>> s = Syncthing.create_instance().system
+            >>> c = ServiceConfig(...)
+            >>> s = System(c)
             >>> connections = s.connections()
             >>> sorted([k for k in connections.keys()])
             ['connections', 'total']
@@ -205,13 +207,14 @@ class System(BaseAPI):
             Args:
                 message (str): Plain-text message to display.
 
-            >>> s = Syncthing.create_instance()
-            >>> s.system.show_error('my error msg')
-            >>> s.system.errors()[0]
+            >>> c = ServiceConfig(...)
+            >>> s = System(c)
+            >>> s.add_error('my error msg')
+            >>> s.errors()[0]
             ... # doctest: +ELLIPSIS
             ErrorEvent(when=datetime.datetime(...), message='my error msg')
-            >>> s.system.clear_errors()
-            >>> s.system.errors()
+            >>> s.clear_errors()
+            >>> s.errors()
             []
         """
         assert isinstance(message, str)

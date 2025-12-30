@@ -6,10 +6,26 @@ import time
 
 from pathlib import Path
 
-from syncthing.syncthing import Syncthing
+from syncthing.config import Config
+from syncthing.database import Database
+from syncthing.events import Events
+from syncthing.system import System
+from syncthing.service_config import ServiceConfig
 from syncthing.syncthing_exception import SyncthingException
 from app_config import AppConfig
 
+def check_service_config(config: ServiceConfig) -> None:
+    """ Checks the connection to the Syncthing API """
+    system: System = System(config)
+
+    # supports GET/POST semantics
+    sync_errors = system.errors()
+    system.clear()
+
+    if sync_errors:
+        for e in sync_errors:
+            print(e)
+        exit(1)
 
 def prepare_logger() -> logging.Logger:
     """ Prepares the logger for the application. """
@@ -20,50 +36,14 @@ def prepare_logger() -> logging.Logger:
     )
     return logging.getLogger(__name__)
 
-def check_connection(syncthing: Syncthing) -> None:
-    """ Checks the connection to the Syncthing API """
-    syncthing.system.connections()
-
-    # supports GET/POST semantics
-    sync_errors = syncthing.system.errors()
-    syncthing.system.clear()
-
-    if sync_errors:
-        for e in sync_errors:
-            print(e)
-        exit(1)
-
-def loop_events(syncthing: Syncthing, config: AppConfig, logger: logging.Logger) -> None:
-    logger.info('Waiting for events')
-    last_seen_id: int | None = None
-    healthy = True
-    while healthy:
-        if last_seen_id:
-            event_stream = syncthing.events(filters=config.filters, last_seen_id=last_seen_id)
-        else:
-            event_stream = syncthing.events(filters=config.filters)
-
-        try:
-            for event in event_stream:
-                process_event(syncthing, event, config, logger)
-                last_seen_id = event.get('id')
-        except SyncthingException:
-            time.sleep(5)
-            continue
-        except KeyboardInterrupt:
-            del event_stream
-            print("\r", end='')
-            logger.info('Stop waiting for events')
-            healthy = False
-
-def process_event(syncthing: Syncthing, event: dict, config: AppConfig, logger: logging.Logger) -> None:
+def process_event(event: dict, app_config: AppConfig, config: Config, database: Database, logger: logging.Logger) -> None:
     data: dict = event.get('data', {})
     if data.get('error') or (not data.get('folder') and not data.get('item')):
         return
 
     try:
-        folder: dict = syncthing.config.folder(data.get('folder'))
-        file: dict = syncthing.database.file(data.get('folder'), data.get('item'))
+        folder: dict = config.folder(data.get('folder'))
+        file: dict = database.file(data.get('folder'), data.get('item'))
         source_path: Path = Path(folder.get('path')) / file.get('local', {}).get('name')
         source_file: str = str(source_path)
     except KeyError:
@@ -75,14 +55,14 @@ def process_event(syncthing: Syncthing, event: dict, config: AppConfig, logger: 
     if source_path.is_dir():
         logger.info(f'Ignoring event for {source_file} because it\'s a folder.')
         return
-    if not source_file.startswith(config.source):
-        logger.info(f'Ignoring event for {source_file} because it does not start with {config.source}.')
+    if not source_file.startswith(app_config.source):
+        logger.info(f'Ignoring event for {source_file} because it does not start with {app_config.source}.')
         return
-    if config.excludes.match(str(source_file)):
+    if app_config.excludes.match(str(source_file)):
         print(f'Ignoring {source_file} because it matches the exclusion pattern')
         return
 
-    destination_path = Path(config.destination) / source_path.relative_to(config.source)
+    destination_path = Path(app_config.destination) / source_path.relative_to(app_config.source)
     destination_file: str = str(destination_path)
 
     destination_parent = destination_path.parent
@@ -105,11 +85,28 @@ def process_event(syncthing: Syncthing, event: dict, config: AppConfig, logger: 
 
 def main():
     logger = prepare_logger()
-    config = AppConfig.load_from_yaml()
-    syncthing = Syncthing.create_instance(config.key)
+    app_config = AppConfig.load_from_yaml()
+    config = Config(app_config)
+    database = Database(app_config)
+    last_seen_id: int= 0
+    healthy = True
 
-    check_connection(syncthing)
-    loop_events(syncthing, config, logger)
+    logger.info('Waiting for events')
+    while healthy:
+        event_stream = Events(app_config, filters=app_config.filters, last_seen_id=last_seen_id)
+
+        try:
+            for event in event_stream:
+                process_event(event, app_config, config, database, logger)
+                last_seen_id = event.get('id')
+        except SyncthingException:
+            time.sleep(5)
+            continue
+        except KeyboardInterrupt:
+            del event_stream
+            print("\r", end='')
+            logger.info('Stop waiting for events')
+            healthy = False
 
 if __name__ == '__main__':
     main()

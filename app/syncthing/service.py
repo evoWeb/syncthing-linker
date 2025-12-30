@@ -24,14 +24,15 @@ class Service(BaseAPI):
         """ Returns a list of canonicalized localization codes, as picked up from the
             Accept-Language header sent by the browser.
 
-            >>> s = Syncthing.create_instance()
-            >>> len(s.service.lang())
+            >>> c = ServiceConfig(...)
+            >>> s = Service(c)
+            >>> len(s.lang())
             1
-            >>> s.service.lang()[0]
+            >>> s.lang()[0]
             ''
-            >>> s.service.lang('en-us')
+            >>> s.lang('en-us')
             ['en-us']
-            >>> s.service.get('lang', headers={'Accept-Language': 'en-us'})
+            >>> s.get('lang', headers={'Accept-Language': 'en-us'})
             ['en-us']
         """
         if accept_language:
@@ -47,22 +48,23 @@ class Service(BaseAPI):
             Args:
                 length (int): default ``32``.
 
-            >>> s = Syncthing.create_instance()
-            >>> len(s.service.random_string())
+            >>> c = ServiceConfig(...)
+            >>> s = Service(c)
+            >>> len(s.random_string())
             32
-            >>> len(s.service.random_string(32))
+            >>> len(s.random_string(32))
             32
-            >>> len(s.service.random_string(1))
+            >>> len(s.random_string(1))
             1
-            >>> len(s.service.random_string(0))
+            >>> len(s.random_string(0))
             32
-            >>> len(s.service.random_string(None))
+            >>> len(s.random_string())
             32
             >>> import string
             >>> all_letters = string.ascii_letters + string.digits
-            >>> all([c in all_letters for c in s.misc.random_string(128)])
+            >>> all([c in all_letters for c in s.random_string(128)])
             True
-            >>> all([c in all_letters for c in s.misc.random_string(1024)])
+            >>> all([c in all_letters for c in s.random_string(1024)])
             True
         """
         return self.get('random/string', params={'length': length}).get('random', '')
@@ -70,8 +72,9 @@ class Service(BaseAPI):
     def report(self) -> dict:
         """ Returns the data sent in the anonymous usage report.
 
-            >>> s = Syncthing.create_instance()
-            >>> report = s.service.report()
+            >>> c = ServiceConfig(...)
+            >>> s = Service(c)
+            >>> report = s.report()
             >>> 'version' in report
             True
             >>> 'longVersion' in report
