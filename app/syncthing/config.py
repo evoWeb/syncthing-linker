@@ -40,7 +40,3 @@ class Config(BaseAPI):
     def folder(self, folder: str) -> dict:
         """ returns the folder/device for the given ID """
         return self.get(f'folders/{folder}')
-
-__all__ = [
-    'Config'
-]

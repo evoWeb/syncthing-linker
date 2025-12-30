@@ -91,10 +91,6 @@ class Syncthing:
             ssl_cert_file=os.getenv('SYNCTHING_CERT_FILE')
         )
 
-__all__ = [
-    'Syncthing'
-]
-
 if __name__ == '__main__':
     import doctest
     doctest.testmod()

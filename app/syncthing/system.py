@@ -256,9 +256,7 @@ class System(BaseAPI):
                 dict: with keys ``success`` and ``error``.
         """
         response = self.post('pause', params={'device': device}, return_response=True)
-        error = response.text
-        if not error:
-            error = None
+        error = response.text or None
         return {'success': response.status_code == requests.codes.ok, 'error': error}
 
     def ping(self, method: str = 'GET') -> dict:

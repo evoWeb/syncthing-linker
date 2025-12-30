@@ -18,9 +18,7 @@ class Cluster(BaseAPI):
                 device (str): Device ID.
         """
         response = self.delete('devices', params={'device': device}, return_response=True)
-        error = response.text
-        if not error:
-            error = None
+        error = response.text or None
         return {'success': response.status_code == requests.codes.ok, 'error': error}
 
     def pending_device(self) -> dict:
@@ -43,9 +41,7 @@ class Cluster(BaseAPI):
                 dict: with keys ``success`` and ``error``.
         """
         response = self.delete('devices', params={'folder': folder, 'device': device}, return_response=True)
-        error = response.text
-        if not error:
-            error = None
+        error = response.text or None
         return {'success': response.status_code == requests.codes.ok, 'error': error}
 
     def pending_folders(self) -> dict:
@@ -54,7 +50,3 @@ class Cluster(BaseAPI):
             a specific remote device. Other offering devices are also omitted from the result.
         """
         return self.delete('folders')
-
-__all__ = [
-    'Cluster'
-]

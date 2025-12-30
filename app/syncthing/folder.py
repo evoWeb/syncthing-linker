@@ -45,7 +45,3 @@ class Folder(BaseAPI):
             an attribute name.
         """
         self.post('versions', params={'folder': folder}, data=files)
-
-__all__ = [
-    'Folder'
-]

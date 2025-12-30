@@ -68,7 +68,3 @@ class Debug(BaseAPI):
                 file (str): file relative path
         """
         return self.post('file', params={'folder': folder, 'file': file})
-
-__all__ = [
-    'Debug'
-]

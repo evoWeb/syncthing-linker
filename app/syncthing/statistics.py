@@ -20,7 +20,3 @@ class Statistics(BaseAPI):
             the last synced file.
         """
         return self.get('folder')
-
-__all__ = [
-    'Statistics'
-]

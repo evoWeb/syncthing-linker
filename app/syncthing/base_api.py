@@ -148,9 +148,9 @@ class BaseAPI:
             except json.JSONDecodeError:
                 return response.content.decode('utf-8')
 
-            if isinstance(json_data, dict) and json_data.get('error'):
+            if json_data.get('error'):
                 api_err = json_data.get('error')
-                raise SyncthingException(api_err)
+                raise SyncthingException(f'Response contains the error {api_err}')
             return json_data
 
 __all__ = [

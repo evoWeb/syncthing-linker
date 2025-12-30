@@ -179,7 +179,3 @@ class Database(BaseAPI):
                 folder (str): Folder ID.
         """
         return self.get('status', params={'folder': folder})
-
-__all__ = [
-    'Database'
-]
