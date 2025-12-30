@@ -18,7 +18,7 @@ from .statistics import Statistics
 from .system import System
 
 
-class Syncthing(object):
+class Syncthing:
     """ Default interface for interacting with Syncthing server instance.
 
         Wrapping all endpoints described in https://docs.syncthing.net/dev/rest.html
