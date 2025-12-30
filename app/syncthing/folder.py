@@ -1,4 +1,5 @@
-from .BaseAPI import BaseAPI
+from .base_api import BaseAPI
+
 
 class Folder(BaseAPI):
     """ HTTP REST endpoint for Folder Services.

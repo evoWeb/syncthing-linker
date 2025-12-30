@@ -1,4 +1,5 @@
-from .BaseAPI import BaseAPI
+from .base_api import BaseAPI
+
 
 class Noauth(BaseAPI):
     """ HTTP REST endpoint for Noauth Services.

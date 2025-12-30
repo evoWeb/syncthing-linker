@@ -6,16 +6,16 @@
 
 import os
 
-from .BaseAPI import DEFAULT_TIMEOUT
-from .Cluster import Cluster
-from .Config import Config
-from .Database import Database
-from .Debug import Debug
-from .Events import Events
-from .Noauth import Noauth
-from .Service import Service
-from .Statistics import Statistics
-from .System import System
+from .base_api import DEFAULT_TIMEOUT
+from .cluster import Cluster
+from .config import Config
+from .database import Database
+from .debug import Debug
+from .events import Events
+from .noauth import Noauth
+from .service import Service
+from .statistics import Statistics
+from .system import System
 
 
 class Syncthing(object):

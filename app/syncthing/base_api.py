@@ -5,7 +5,8 @@ import requests
 
 from requests import Response
 
-from .SyncthingException import SyncthingException
+from .syncthing_exception import SyncthingException
+
 
 DEFAULT_TIMEOUT = 10
 

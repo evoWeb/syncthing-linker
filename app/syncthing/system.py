@@ -5,8 +5,8 @@ import warnings
 from collections import namedtuple
 from dateutil.parser import parse as dateutil_parser
 
-from .BaseAPI import BaseAPI
-from .SyncthingException import SyncthingException
+from .base_api import BaseAPI
+from .syncthing_exception import SyncthingException
 
 
 ErrorEvent = namedtuple('ErrorEvent', 'when, message')

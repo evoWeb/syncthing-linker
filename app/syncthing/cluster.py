@@ -1,6 +1,7 @@
 import requests
 
-from .BaseAPI import BaseAPI
+from .base_api import BaseAPI
+
 
 class Cluster(BaseAPI):
     """ HTTP REST endpoint for Cluster Services.

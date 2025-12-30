@@ -1,4 +1,5 @@
-from .BaseAPI import BaseAPI
+from .base_api import BaseAPI
+
 
 class Service(BaseAPI):
     """ HTTP REST endpoint for Misc Services.

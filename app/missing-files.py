@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from AppConfig import AppConfig
+from app_config import AppConfig
 
 
 def link_missing_file(source_path: Path, config: AppConfig) -> None:

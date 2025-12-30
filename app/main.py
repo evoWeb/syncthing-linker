@@ -5,9 +5,9 @@ import sys
 
 from pathlib import Path
 
-from Syncthing.Syncthing import Syncthing
-from Syncthing.SyncthingException import SyncthingException
-from AppConfig import AppConfig
+from syncthing.syncthing import Syncthing
+from syncthing.syncthing_exception import SyncthingException
+from app_config import AppConfig
 
 class Main:
     logger: logging.Logger

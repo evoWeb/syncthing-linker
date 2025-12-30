@@ -2,8 +2,8 @@ from requests.exceptions import Timeout
 from urllib3.exceptions import TimeoutError
 from typing import Generator
 
-from .BaseAPI import BaseAPI
-from .SyncthingException import SyncthingException
+from .base_api import BaseAPI
+from .syncthing_exception import SyncthingException
 
 
 class Events(BaseAPI):
