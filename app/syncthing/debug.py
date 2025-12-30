@@ -22,9 +22,9 @@ class Debug(BaseAPI):
             2
             >>> 'enabled' in debug and 'facilities' in debug
             True
-            >>> isinstance(debug['enabled'], list) or debug['enabled'] is None
+            >>> isinstance(debug.get('enabled'), list) or debug.get('enabled') is None
             True
-            >>> isinstance(debug['facilities'], dict)
+            >>> isinstance(debug.get('facilities'), dict)
             True
         """
         return self.get('cpuprof')
@@ -42,9 +42,9 @@ class Debug(BaseAPI):
             2
             >>> 'enabled' in debug and 'facilities' in debug
             True
-            >>> isinstance(debug['enabled'], list) or debug['enabled'] is None
+            >>> isinstance(debug.get('enabled'), list) or debug.get('enabled') is None
             True
-            >>> isinstance(debug['facilities'], dict)
+            >>> isinstance(debug.get('facilities'), dict)
             True
         """
         return self.get('heapprof')

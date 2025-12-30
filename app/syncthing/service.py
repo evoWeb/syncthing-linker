@@ -76,7 +76,7 @@ class Service(BaseAPI):
             True
             >>> 'longVersion' in report
             True
-            >>> 'syncthing v' in report['longVersion']
+            >>> 'syncthing v' in report.get('longVersion')
             True
         """
         return self.get('report')

@@ -44,7 +44,7 @@ def loop_events(syncthing: Syncthing, config: AppConfig, logger: logging.Logger)
         try:
             for event in event_stream:
                 process_event(syncthing, event, config, logger)
-                last_seen_id = event['id']
+                last_seen_id = event.get('id')
         except SyncthingException:
             continue
         except KeyboardInterrupt:
@@ -59,9 +59,9 @@ def process_event(syncthing: Syncthing, event: dict, config: AppConfig, logger: 
         return
 
     try:
-        folder: dict = syncthing.config.folder(data['folder'])
-        file: dict = syncthing.database.file(data['folder'], data['item'])
-        source_path: Path = Path(folder['path']) / file['local']['name']
+        folder: dict = syncthing.config.folder(data.get('folder'))
+        file: dict = syncthing.database.file(data.get('folder'), data.get('item'))
+        source_path: Path = Path(folder.get('path')) / file.get('local').get('name')
         source_file: str = str(source_path)
     except KeyError:
         return

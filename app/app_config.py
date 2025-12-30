@@ -28,25 +28,13 @@ class AppConfig:
             if config is None:
                 raise Exception('Configuration is empty.')
 
-            if 'source' not in config:
-                config['source'] = '/files/source/'
-            if 'destination' not in config:
-                config['destination'] = '/files/destination/'
-            if 'filters' not in config:
-                config['filters'] = 'ItemFinished'
-
-            if isinstance(config['filters'], str):
-                config['filters'] = config['filters'].split(',')
-
-            excludes: str = config.get('excludes', '')
-
             return AppConfig(
-                source=config.get('source'),
-                destination=config.get('destination'),
-                filters=config.get('filters', []),
-                excludes=re.compile(f'{excludes}')
+                source=str(config.get('source', '/files/source/')),
+                destination=str(config.get('destination', '/files/destination/')),
+                filters=str(config.get('filter', 'ItemFinished')).split(','),
+                excludes=re.compile(str(config.get('excludes', '')))
             )
-        except FileNotFoundError:
-            raise Exception(f'Fehler: Die Konfigurationsdatei "{config_path}" wurde nicht gefunden.')
+        except FileNotFoundError as e:
+            raise Exception(f'Fehler: Die Konfigurationsdatei "{config_path}" wurde nicht gefunden.') from e
         except yaml.YAMLError as yamlError:
-            raise Exception(f'Fehler beim Parsen der YAML-Datei: {yamlError}')
+            raise Exception(f'Fehler beim Parsen der YAML-Datei: {config_path}') from yamlError

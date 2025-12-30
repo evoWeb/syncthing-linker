@@ -35,9 +35,9 @@ def keys_to_datetime(obj: dict | None, *keys) -> dict:
                  'two': '2016-06-06T19:41:43.039284'}
         >>> keys_to_datetime(obj) == a
         True
-        >>> keys_to_datetime(obj, 'one')['one']
+        >>> keys_to_datetime(obj, 'one').get('one')
         datetime.datetime(2016, 6, 6, 19, 41, 43, 39284)
-        >>> keys_to_datetime(obj, 'one')['two']
+        >>> keys_to_datetime(obj, 'one').get('two')
         '2016-06-06T19:41:43.039284'
     """
     if not keys:
@@ -104,7 +104,7 @@ class System(BaseAPI):
             >>> config
             ... # doctest: +ELLIPSIS
             {...}
-            >>> 'version' in config and config['version'] >= 15
+            >>> 'version' in config and config.get('version') >= 15
             True
             >>> 'folders' in config
             True
@@ -155,9 +155,9 @@ class System(BaseAPI):
             >>> connections = s.connections()
             >>> sorted([k for k in connections.keys()])
             ['connections', 'total']
-            >>> isinstance(connections['connections'], dict)
+            >>> isinstance(connections.get('connections'), dict)
             True
-            >>> isinstance(connections['total'], dict)
+            >>> isinstance(connections.get('total'), dict)
             True
         """
         return self.get('connections')

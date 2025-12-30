@@ -120,7 +120,7 @@ class Events(BaseAPI):
                     yield event
                 # update our last_seen_id to move our event counter forward
                 last: dict = data[-1]
-                self._last_seen_id = last['id']
+                self._last_seen_id = last.get('id')
 
     def events_disk(self) -> Generator[dict]:
         """ This convenience endpoint provides the same event stream, but pre-filtered to show
