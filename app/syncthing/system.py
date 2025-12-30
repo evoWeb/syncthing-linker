@@ -3,7 +3,7 @@ import requests
 import warnings
 
 from dataclasses import dataclass
-from dateutil.parser import parse as dateutil_parser
+from dateutil.parser import parse
 
 from .base_api import BaseAPI
 from .syncthing_exception import SyncthingException
@@ -14,7 +14,6 @@ class ErrorEvent:
     """ used to process error lists more easily, instead of by two-key dictionaries. """
     when: datetime.datetime
     message: str
-
 
 def keys_to_datetime(obj: dict | None, *keys) -> dict:
     """ Converts all the keys in an object to DateTime instances.
@@ -31,8 +30,7 @@ def keys_to_datetime(obj: dict | None, *keys) -> dict:
         >>> obj = {}
         >>> id(keys_to_datetime(a)) == id(a)
         True
-        >>> a = {'one': '2016-06-06T19:41:43.039284',
-                 'two': '2016-06-06T19:41:43.039284'}
+        >>> a = {'one': '2016-06-06T19:41:43.039284', 'two': '2016-06-06T19:41:43.039284'}
         >>> keys_to_datetime(obj) == a
         True
         >>> keys_to_datetime(obj, 'one').get('one')
@@ -51,23 +49,21 @@ def keys_to_datetime(obj: dict | None, *keys) -> dict:
         obj[k] = parse_datetime(v)
     return obj
 
-
 def parse_datetime(date_string: str | None, **kwargs) -> datetime.datetime | None:
     """ Converts a time-string into a valid :py:class:`~datetime.datetime.DateTime` object.
 
         Args:
             date_string (str): string to be formatted.
 
-        ``**kwargs`` is passed directly to:func:`.dateutil_parser`.
+        ``**kwargs`` is passed directly to:func:`.parse`.
     """
     if not date_string:
         return None
     try:
-        ret = dateutil_parser(date_string, **kwargs)
+        ret = parse(date_string, **kwargs)
     except (OverflowError, TypeError, ValueError) as e:
         raise SyncthingException(f'datetime parsing error from {date_string}', e)
     return ret
-
 
 class System(BaseAPI):
     """ HTTP REST endpoint for System calls.
@@ -351,7 +347,5 @@ class System(BaseAPI):
 
 __all__ = [
     'ErrorEvent',
-    'keys_to_datetime',
-    'parse_datetime',
     'System'
 ]

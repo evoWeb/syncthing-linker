@@ -1,5 +1,7 @@
 import logging
-import sys
+import os
+import re
+import yaml
 
 from pathlib import Path
 
@@ -26,14 +28,34 @@ def link_source_to_destination(source_path: Path, destination_path: Path, logger
         logger.error(f'Error linking {source_path} to {destination_path}: {e}')
         return
 
-def prepare_logger() -> logging.Logger:
-    """ Prepares the logger for the application. """
-    logging.basicConfig(
-        level=logging.INFO,
-        format='%(asctime)s - %(levelname)s - %(message)s',
-        stream=sys.stderr  # stderr is unbuffered!
+def initialize_app_config(config_path: str = '/config/config.yaml'):
+    """ Load configuration and check if minimum requirements are met """
+    with open(config_path, 'r', encoding='utf-8') as file:
+        config = yaml.safe_load(file)
+
+    if config is None:
+        raise ValueError('Configuration is empty.')
+
+    api_key: str = os.getenv('SYNCTHING_API_KEY', '')
+    if not api_key:
+        raise Exception('No API key found.')
+
+    host: str = os.getenv('SYNCTHING_HOST', '127.0.0.1')
+    port: int = os.getenv('SYNCTHING_PORT', 8384)
+    is_https: bool = os.getenv('SYNCTHING_HTTPS', '0').lower() in ('1', 'true', 'yes')
+    ssl_cert_file: str = os.getenv('SYNCTHING_CERT_FILE')
+
+    return AppConfig(
+        api_key,
+        host,
+        port,
+        is_https=is_https,
+        ssl_cert_file=ssl_cert_file,
+        source=str(config.get('source', '/files/source/')),
+        destination=str(config.get('destination', '/files/destination/')),
+        filters=str(config.get('filter', 'ItemFinished')).split(','),
+        excludes=re.compile(str(config.get('excludes', '')))
     )
-    return logging.getLogger(__name__)
 
 def source_path_is_qualified(source_path: Path, app_config: AppConfig, logger: logging.Logger) -> bool:
     """ Checks whether the given path is qualified for linking. """
@@ -52,7 +74,7 @@ def source_path_is_qualified(source_path: Path, app_config: AppConfig, logger: l
     return True
 
 __all__ = [
+    'initialize_app_config',
     'link_source_to_destination',
-    'prepare_logger',
     'source_path_is_qualified'
 ]

@@ -12,9 +12,7 @@ from syncthing.system import System
 from syncthing.service_config import ServiceConfig
 from syncthing.syncthing_exception import SyncthingException
 from app_config import AppConfig
-from utilities import link_source_to_destination
-from utilities import prepare_logger
-from utilities import source_path_is_qualified
+import utilities
 
 def check_service_config(config: ServiceConfig, logger: logging.Logger) -> None:
     """ Checks the connection to the Syncthing API """
@@ -46,19 +44,23 @@ def get_source_path_for_event(event: dict, config: Config, database: Database) -
 def process_event(event: dict, app_config: AppConfig, config: Config, database: Database, logger: logging.Logger) -> None:
     source_path = get_source_path_for_event(event, config, database)
 
-    if not source_path_is_qualified(source_path, app_config, logger):
+    if not utilities.source_path_is_qualified(source_path, app_config, logger):
         return
 
     destination_path = Path(app_config.destination) / source_path.relative_to(app_config.source)
-    link_source_to_destination(source_path, destination_path, logger)
+    utilities.link_source_to_destination(source_path, destination_path, logger)
 
 def main():
-    logger = prepare_logger()
-    app_config = AppConfig.load_from_yaml()
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(levelname)s - %(message)s'
+    )
+    logger = logging.getLogger(__name__)
+    app_config = utilities.initialize_app_config()
     check_service_config(app_config, logger)
     config = Config(app_config)
     database = Database(app_config)
-    last_seen_id: int= 0
+    last_seen_id: int = 0
     healthy = True
 
     logger.info('Waiting for events')
@@ -72,7 +74,6 @@ def main():
         except SyncthingException:
             time.sleep(5)
         except KeyboardInterrupt:
-            del event_stream
             print("\r", end='')
             logger.info('Stop waiting for events')
             healthy = False

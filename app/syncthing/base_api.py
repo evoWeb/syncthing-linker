@@ -40,7 +40,7 @@ class BaseAPI:
         data: dict | str | None = None,
         headers: dict | None = None,
         params: dict | None = None
-    ) -> Response | int | str | dict | list:
+    ) -> int | str | dict | list:
         return self._request('GET', self.prefix + endpoint, data, headers, params)
 
     def post(
@@ -49,7 +49,7 @@ class BaseAPI:
         data: dict | str | None = None,
         headers: dict | None = None,
         params: dict | None = None
-    ) -> Response | int | str | dict | list:
+    ) -> int | str | dict | list:
         return self._request('POST', self.prefix + endpoint, data, headers, params)
 
     def put(
@@ -58,7 +58,7 @@ class BaseAPI:
         data: dict | str | None = None,
         headers: dict | None = None,
         params: dict | None = None
-    ) -> Response | int | str | dict | list:
+    ) -> int | str | dict | list:
         return self._request('PUT', self.prefix + endpoint, data, headers, params)
 
     def delete(
@@ -67,7 +67,7 @@ class BaseAPI:
         data: dict | str | None = None,
         headers: dict | None = None,
         params: dict | None = None
-    ) -> Response | int | str | dict | list:
+    ) -> int | str | dict | list:
         return self._request('DELETE', self.prefix + endpoint, data, headers, params)
 
     def _request(
@@ -77,19 +77,14 @@ class BaseAPI:
         data: dict | str | None = None,
         headers: dict | None = None,
         params: dict | None = None
-    ) -> Response | int | str | dict | list:
+    ) -> int | str | dict | list:
         try:
             response = self.raw_request(method, endpoint, data, headers, params)
             response.raise_for_status()
-
         except requests.RequestException as e:
             raise SyncthingException('HTTP request error') from e
 
         else:
-            if response.status_code != requests.codes.ok:
-                self.logger.error(f'{response.status_code} {response.reason} ({response.url}): {response.text}')
-                return response
-
             try:
                 json_data = response.json()
             except json.JSONDecodeError:

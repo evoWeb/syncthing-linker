@@ -1,15 +1,18 @@
 #!/usr/bin/env python
 
+import logging
+
 from pathlib import Path
 
-from app_config import AppConfig
-from utilities import link_source_to_destination
-from utilities import prepare_logger
-from utilities import source_path_is_qualified
+import utilities
 
 def main():
-    logger = prepare_logger()
-    app_config = AppConfig.load_from_yaml()
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(levelname)s - %(message)s'
+    )
+    logger = logging.getLogger(__name__)
+    app_config = utilities.initialize_app_config()
 
     source: str = app_config.source
     logger.info(f'search in {source}')
@@ -20,11 +23,11 @@ def main():
         return
 
     for source_path in source_path.rglob('*'):
-        if not source_path_is_qualified(source_path, app_config, logger):
+        if not utilities.source_path_is_qualified(source_path, app_config, logger):
             continue
 
         destination_path = Path(app_config.destination) / source_path.relative_to(app_config.source)
-        link_source_to_destination(source_path, destination_path, logger)
+        utilities.link_source_to_destination(source_path, destination_path, logger)
 
 if __name__ == '__main__':
     main()

@@ -1,5 +1,6 @@
 import requests
 import urllib3
+
 from typing import Generator
 
 from .base_api import BaseAPI
@@ -18,11 +19,6 @@ class Events(BaseAPI):
         >>> l = logging.Logger()
         >>> c = ServiceConfig(...)
         >>> event_stream = Events(c, limit=5)
-
-        >>> for event in event_stream:
-        >>>    l.info(event)
-        >>>    if event_stream.count > 10:
-        >>>        del event_stream
     """
 
     prefix: str = '/rest/'
@@ -35,7 +31,7 @@ class Events(BaseAPI):
         filters: list[str] = None,
         limit: int = 10,
     ):
-        super(Events, self).__init__(config)
+        super().__init__(config)
         self._last_seen_id = last_seen_id or 0
         self._filters = filters
         self._limit = limit
@@ -78,20 +74,13 @@ class Events(BaseAPI):
                 limit (int): The number of events to query in the history
                     to catch up to the current state.
         """
-
-        # coerce
-        if not isinstance(limit, (int, None)):
-            limit = None
-
-        # coerce
-        if filters is None:
-            filters = []
+        filters = filters or []
 
         # block/long-poll for updates to the events api
         while True:
             params: dict[str, str | int] = {
                 'since': self._last_seen_id,
-                'limit': limit,
+                'limit': limit or None,
             }
 
             if filters:
@@ -102,8 +91,6 @@ class Events(BaseAPI):
             except (requests.exceptions.Timeout, requests.exceptions.ReadTimeout, urllib3.exceptions.TimeoutError) as e:
                 # swallow timeout errors for long polling
                 raise SyncthingException('Timeout while fetching new events') from e
-            except Exception as e:
-                raise SyncthingException('Get new event failed') from e
 
             if data:
                 for event in data:
