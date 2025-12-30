@@ -10,7 +10,7 @@ from .syncthing_exception import SyncthingException
 
 DEFAULT_TIMEOUT = 10
 
-class BaseAPI(object):
+class BaseAPI:
     """ Placeholder for HTTP REST API URL prefix. """
 
     prefix = ''
