@@ -81,8 +81,14 @@ class Main:
         if not source_path.exists():
             self.logger.info(f'Ignoring event for {source_file} because it does not exist.')
             return
+        if source_path.is_dir():
+            self.logger.info(f'Ignoring event for {source_file} because it\'s a folder.')
+            return
         if not source_file.startswith(self.config.source):
             self.logger.info(f'Ignoring event for {source_file} because it does not start with {self.config.source}.')
+            return
+        if self.config.excludes.match(str(source_file)):
+            print(f'Ignoring {source_file} because it matches the exclusion pattern')
             return
 
         destination_file: str = self.config.destination + source_file[len(self.config.source):]
