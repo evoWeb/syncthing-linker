@@ -2,7 +2,7 @@ import os
 import json
 import logging
 import requests
-import urllib3
+from urllib.parse import urljoin
 
 from requests import Response
 
@@ -118,8 +118,7 @@ class BaseAPI:
         params: dict | None = None
     ) -> Response:
         method = method.upper()
-
-        endpoint = self.url + endpoint
+        endpoint = urljoin(self.url, endpoint)
 
         if method not in ('GET', 'POST', 'PUT', 'DELETE'):
             raise SyncthingException(f'unsupported http verb requested, {method}')
