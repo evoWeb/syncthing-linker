@@ -26,7 +26,7 @@ class BaseAPI(object):
     ):
         if ssl_cert_file:
             if not os.path.exists(ssl_cert_file):
-                raise SyncthingException('ssl_cert_file does not exist at location, %s' % ssl_cert_file)
+                raise SyncthingException(f'ssl_cert_file does not exist at location, {ssl_cert_file}')
 
         self.api_key = api_key
         self.host = host
@@ -38,8 +38,8 @@ class BaseAPI(object):
         self._headers = {
             'X-API-Key': api_key
         }
-        self.url = '{proto}://{host}:{port}'.format(proto='https' if is_https else 'http', host=host, port=port)
-        self._base_url = self.url + '{endpoint}'
+        self.proto: str = 'https' if is_https else 'http'
+        self.url = f'{self.proto}://{self.host}:{self.port}'
         self.logger = logging.getLogger(__name__)
 
     def get(
@@ -98,22 +98,25 @@ class BaseAPI(object):
     ) -> Response | int | str | dict | list:
         method = method.upper()
 
-        endpoint = self._base_url.format(endpoint=endpoint)
+        endpoint = self.url + endpoint
 
         if method not in ('GET', 'POST', 'PUT', 'DELETE'):
-            raise SyncthingException('unsupported http verb requested, %s' % method)
+            raise SyncthingException(f'unsupported http verb requested, {method}')
 
         if data is None:
             data = {}
-        assert isinstance(data, str) or isinstance(data, dict)
 
         if headers is None:
             headers = {}
-        assert isinstance(headers, dict)
-
-        headers.update(self._headers)
 
         try:
+            if not isinstance(data, dict):
+                raise AssertionError()
+            if not isinstance(headers, dict):
+                raise AssertionError()
+
+            headers.update(self._headers)
+
             response = requests.request(
                 method,
                 endpoint,
@@ -137,7 +140,7 @@ class BaseAPI(object):
                 return response
 
             if response.status_code != requests.codes.ok:
-                self.logger.error('%d %s (%s): %s', response.status_code, response.reason, response.url, response.text)
+                self.logger.error(f'{response.status_code} {response.reason} ({response.url}): {response.text}')
                 return response
 
             if 'json' in response.headers.get('Content-Type', 'text/plain').lower():
