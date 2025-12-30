@@ -49,7 +49,8 @@ def loop_events(syncthing: Syncthing, config: AppConfig, logger: logging.Logger)
             continue
         except KeyboardInterrupt:
             del event_stream
-            print('bye bye')
+            print("\r", end='')
+            logger.info('Stop waiting for events')
             exit(0)
 
 def process_event(syncthing: Syncthing, event: dict, config: AppConfig, logger: logging.Logger) -> None:
@@ -100,11 +101,12 @@ def process_event(syncthing: Syncthing, event: dict, config: AppConfig, logger: 
         return
 
 def main():
+    logger = prepare_logger()
     config = AppConfig.load_from_yaml()
-
     syncthing = Syncthing.create_instance(config.key)
+
     check_connection(syncthing)
-    loop_events(syncthing, config, prepare_logger())
+    loop_events(syncthing, config, logger)
 
 if __name__ == '__main__':
     main()
