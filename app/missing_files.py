@@ -23,11 +23,7 @@ def main():
         return
 
     for source_path in source_path.rglob('*'):
-        if not utilities.source_path_is_qualified(source_path, app_config, logger):
-            continue
-
-        destination_path = Path(app_config.destination) / source_path.relative_to(app_config.source)
-        utilities.link_source_to_destination(source_path, destination_path, logger)
+        utilities.process_source_path(source_path, app_config, logger)
 
 if __name__ == '__main__':
     main()

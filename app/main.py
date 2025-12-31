@@ -11,7 +11,6 @@ from syncthing.events import Events
 from syncthing.system import System
 from syncthing.service_config import ServiceConfig
 from syncthing.syncthing_exception import SyncthingException
-from app_config import AppConfig
 import utilities
 
 def check_service_config(config: ServiceConfig, logger: logging.Logger) -> None:
@@ -41,15 +40,6 @@ def get_source_path_for_event(event: dict, config: Config, database: Database) -
 
     return source_path
 
-def process_event(event: dict, app_config: AppConfig, config: Config, database: Database, logger: logging.Logger) -> None:
-    source_path = get_source_path_for_event(event, config, database)
-
-    if not utilities.source_path_is_qualified(source_path, app_config, logger):
-        return
-
-    destination_path = Path(app_config.destination) / source_path.relative_to(app_config.source)
-    utilities.link_source_to_destination(source_path, destination_path, logger)
-
 def main():
     logging.basicConfig(
         level=logging.INFO,
@@ -57,26 +47,28 @@ def main():
     )
     logger = logging.getLogger(__name__)
     app_config = utilities.initialize_app_config()
+
     check_service_config(app_config, logger)
     config = Config(app_config)
     database = Database(app_config)
     last_seen_id: int = 0
-    healthy = True
+    continue_working = True
 
     logger.info('Waiting for events')
-    while healthy:
+    while continue_working:
         event_stream = Events(app_config, filters=app_config.filters, last_seen_id=last_seen_id)
 
         try:
             for event in event_stream:
-                process_event(event, app_config, config, database, logger)
+                source_path = get_source_path_for_event(event, config, database)
+                utilities.process_source_path(source_path, app_config, logger)
                 last_seen_id = event.get('id')
         except SyncthingException:
             time.sleep(5)
         except KeyboardInterrupt:
             print("\r", end='')
             logger.info('Stop waiting for events')
-            healthy = False
+            continue_working = False
 
 if __name__ == '__main__':
     main()

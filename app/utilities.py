@@ -8,26 +8,6 @@ from pathlib import Path
 from app_config import AppConfig
 
 
-def link_source_to_destination(source_path: Path, destination_path: Path, logger: logging.Logger) -> None:
-    """ Hardlinks the source file to the destination. """
-    destination_parent = destination_path.parent
-    if not destination_parent.exists():
-        destination_parent.mkdir(parents=True, exist_ok=True)
-        logger.info(f'Created parent directory {destination_parent} for {destination_path}.')
-
-    if destination_path.exists():
-        # we don't want to overwrite existing files
-        return
-
-    try:
-        destination_path.hardlink_to(source_path)
-        logger.info(f'Linked {source_path} to {destination_path}')
-    except FileExistsError:
-        return
-    except OSError as e:
-        logger.error(f'Error linking {source_path} to {destination_path}: {e}')
-        return
-
 def initialize_app_config(config_path: str = '/config/config.yaml'):
     """ Load configuration and check if minimum requirements are met """
     with open(config_path, 'r', encoding='utf-8') as file:
@@ -57,6 +37,33 @@ def initialize_app_config(config_path: str = '/config/config.yaml'):
         excludes=re.compile(str(config.get('excludes', '')))
     )
 
+def link_source_to_destination(source_path: Path, destination_path: Path, logger: logging.Logger) -> None:
+    """ Hardlinks the source file to the destination. """
+    destination_parent = destination_path.parent
+    if not destination_parent.exists():
+        destination_parent.mkdir(parents=True, exist_ok=True)
+        logger.info(f'Created parent directory {destination_parent} for {destination_path}.')
+
+    if destination_path.exists():
+        # we don't want to overwrite existing files
+        return
+
+    try:
+        destination_path.hardlink_to(source_path)
+        logger.info(f'Linked {source_path} to {destination_path}')
+    except FileExistsError:
+        return
+    except OSError as e:
+        logger.error(f'Error linking {source_path} to {destination_path}: {e}')
+        return
+
+def process_source_path(source_path: Path, app_config: AppConfig, logger: logging.Logger):
+    if not source_path_is_qualified(source_path, app_config, logger):
+        return
+
+    destination_path = Path(app_config.destination) / source_path.relative_to(app_config.source)
+    link_source_to_destination(source_path, destination_path, logger)
+
 def source_path_is_qualified(source_path: Path, app_config: AppConfig, logger: logging.Logger) -> bool:
     """ Checks whether the given path is qualified for linking. """
     if not source_path or not source_path.exists():
@@ -75,6 +82,5 @@ def source_path_is_qualified(source_path: Path, app_config: AppConfig, logger: l
 
 __all__ = [
     'initialize_app_config',
-    'link_source_to_destination',
-    'source_path_is_qualified'
+    'process_source_path'
 ]
