@@ -1,114 +1,74 @@
 #!/usr/bin/env python
 
 import logging
-import sys
+import time
 
 from pathlib import Path
 
-from Syncthing.Syncthing import Syncthing
-from Syncthing.Syncthing import syncthing_factory
-from Syncthing.SyncthingException import SyncthingException
-from AppConfig import AppConfig
+from syncthing.config import Config
+from syncthing.database import Database
+from syncthing.events import Events
+from syncthing.system import System
+from syncthing.service_config import ServiceConfig
+from syncthing.syncthing_exception import SyncthingException
+import utilities
 
-class Main:
-    logger: logging.Logger
-    config: AppConfig
+def check_service_config(config: ServiceConfig, logger: logging.Logger) -> None:
+    """ Checks the connection to the Syncthing API """
+    system: System = System(config)
 
-    def __init__(self):
-        self.logger = self.prepare_logger()
-        self.config = AppConfig.load_from_yaml()
+    # supports GET/POST semantics
+    sync_errors = system.errors()
+    system.clear()
 
-        syncthing = syncthing_factory(self.config.key)
-        self.check_connection(syncthing)
-        self.loop_events(syncthing)
+    if sync_errors:
+        for e in sync_errors:
+            logger.error(e)
+        raise RuntimeError('Accessing Syncthing API failed.')
 
-    @staticmethod
-    def prepare_logger() -> logging.Logger:
-        logging.basicConfig(
-            level=logging.INFO,
-            format='%(asctime)s - %(levelname)s - %(message)s',
-            stream=sys.stderr  # stderr is unbuffered!
-        )
-        return logging.getLogger(__name__)
+def get_source_path_for_event(event: dict, config: Config, database: Database) -> Path | None:
+    data: dict = event.get('data', {})
+    if data.get('error') or (not data.get('folder') and not data.get('item')):
+        return None
 
-    @staticmethod
-    def check_connection(syncthing: Syncthing) -> None:
-        """ Checks the connection to the Syncthing API """
-        syncthing.system.connections()
+    try:
+        folder: dict = config.folder(data.get('folder'))
+        file: dict = database.file(data.get('folder'), data.get('item'))
+        source_path: Path = Path(folder.get('path')) / file.get('local', {}).get('name')
+    except KeyError:
+        return None
 
-        # supports GET/POST semantics
-        sync_errors = syncthing.system.errors()
-        syncthing.system.clear()
+    return source_path
 
-        if sync_errors:
-            for e in sync_errors:
-                print(e)
-            exit(1)
+def main():
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(levelname)s - %(message)s'
+    )
+    logger = logging.getLogger(__name__)
+    app_config = utilities.initialize_app_config()
 
-    def loop_events(self, syncthing: Syncthing) -> None:
-        self.logger.info('Waiting for events')
-        last_seen_id: int | None = None
-        while True:
-            if last_seen_id:
-                event_stream = syncthing.events(filters=self.config.filters, last_seen_id=last_seen_id)
-            else:
-                event_stream = syncthing.events(filters=self.config.filters)
+    check_service_config(app_config, logger)
+    config = Config(app_config)
+    database = Database(app_config)
+    last_seen_id: int = 0
+    continue_working = True
 
-            try:
-                for event in event_stream:
-                    self.process_event(syncthing, event)
-                    last_seen_id = event['id']
-            except SyncthingException:
-                continue
-            except KeyboardInterrupt:
-                event_stream.stop()
-                print('bye bye')
-                exit(0)
-
-    def process_event(self, syncthing: Syncthing, event: dict) -> None:
-        data: dict = event.get('data', {})
-        if data.get('error', None) is not None or 'folder' not in data or 'item' not in data:
-            return
+    logger.info('Waiting for events')
+    while continue_working:
+        event_stream = Events(app_config, filters=app_config.filters, last_seen_id=last_seen_id)
 
         try:
-            folder: dict = syncthing.config.folder(data['folder'])
-            file: dict = syncthing.database.file(data['folder'], data['item'])
-            source_file = folder['path'].rstrip('/') + '/' + file['local']['name']
-        except KeyError:
-            return
-
-        source_path = Path(source_file)
-        if not source_path.exists():
-            self.logger.info(f'Ignoring event for {source_file} because it does not exist.')
-            return
-        if not source_file.startswith(self.config.source):
-            self.logger.info(f'Ignoring event for {source_file} because it does not start with {self.config.source}.')
-            return
-
-        destination_file: str = self.config.destination + source_file[len(self.config.source):]
-        destination_path = Path(destination_file)
-
-        destination_parent = destination_path.parent
-        if not destination_parent.exists():
-            destination_parent.mkdir(parents=True, exist_ok=True)
-            self.logger.info(f'Created parent directory {destination_parent} for {destination_file}.')
-
-        if destination_path.exists():
-            # we don't want to overwrite existing files
-            return
-
-        try:
-            destination_path.hardlink_to(source_file)
-            self.logger.info(f'Linked {source_file} to {destination_file}')
-        except FileExistsError:
-            return
-        except OSError as e:
-            self.logger.error(f'Error linking {source_file} to {destination_file}: {e}')
-            return
+            for event in event_stream:
+                source_path = get_source_path_for_event(event, config, database)
+                utilities.process_source_path(source_path, app_config, logger)
+                last_seen_id = event.get('id')
+        except SyncthingException:
+            time.sleep(5)
+        except KeyboardInterrupt:
+            print("\r", end='')
+            logger.info('Stop waiting for events')
+            continue_working = False
 
 if __name__ == '__main__':
-    Main()
-
-__all__ = [
-    'Main'
-]
+    main()

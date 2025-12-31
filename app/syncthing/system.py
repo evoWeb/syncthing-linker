@@ -2,16 +2,18 @@ import datetime
 import requests
 import warnings
 
-from collections import namedtuple
-from dateutil.parser import parse as dateutil_parser
+from dataclasses import dataclass
+from dateutil.parser import parse
 
-from .BaseAPI import BaseAPI
-from .SyncthingException import SyncthingException
+from .base_api import BaseAPI
+from .syncthing_exception import SyncthingException
 
 
-ErrorEvent = namedtuple('ErrorEvent', 'when, message')
-""" tuple[datetime.datetime,str]: used to process error lists more easily, instead of by two-key dictionaries. """
-
+@dataclass
+class ErrorEvent:
+    """ used to process error lists more easily, instead of by two-key dictionaries. """
+    when: datetime.datetime
+    message: str
 
 def keys_to_datetime(obj: dict | None, *keys) -> dict:
     """ Converts all the keys in an object to DateTime instances.
@@ -25,16 +27,15 @@ def keys_to_datetime(obj: dict | None, *keys) -> dict:
         True
         >>> keys_to_datetime({})
         {}
-        >>> a = {}
+        >>> obj = {}
         >>> id(keys_to_datetime(a)) == id(a)
         True
-        >>> a = {'one': '2016-06-06T19:41:43.039284',
-                 'two': '2016-06-06T19:41:43.039284'}
-        >>> keys_to_datetime(a) == a
+        >>> a = {'one': '2016-06-06T19:41:43.039284', 'two': '2016-06-06T19:41:43.039284'}
+        >>> keys_to_datetime(obj) == a
         True
-        >>> keys_to_datetime(a, 'one')['one']
+        >>> keys_to_datetime(obj, 'one').get('one')
         datetime.datetime(2016, 6, 6, 19, 41, 43, 39284)
-        >>> keys_to_datetime(a, 'one')['two']
+        >>> keys_to_datetime(obj, 'one').get('two')
         '2016-06-06T19:41:43.039284'
     """
     if not keys:
@@ -48,23 +49,21 @@ def keys_to_datetime(obj: dict | None, *keys) -> dict:
         obj[k] = parse_datetime(v)
     return obj
 
-
 def parse_datetime(date_string: str | None, **kwargs) -> datetime.datetime | None:
     """ Converts a time-string into a valid :py:class:`~datetime.datetime.DateTime` object.
 
         Args:
             date_string (str): string to be formatted.
 
-        ``**kwargs`` is passed directly to :func:`.dateutil_parser`.
+        ``**kwargs`` is passed directly to:func:`.parse`.
     """
     if not date_string:
         return None
     try:
-        ret = dateutil_parser(date_string, **kwargs)
+        ret = parse(date_string, **kwargs)
     except (OverflowError, TypeError, ValueError) as e:
-        raise SyncthingException('datetime parsing error from %s' % date_string, e)
+        raise SyncthingException(f'datetime parsing error from {date_string}', e)
     return ret
-
 
 class System(BaseAPI):
     """ HTTP REST endpoint for System calls.
@@ -89,19 +88,20 @@ class System(BaseAPI):
             params = {'current': path}
         return self.get('browse', params=params)
 
-    # DEPRECATED
     def config(self) -> dict:
+        warnings.warn('System.config() is deprecated', DeprecationWarning, stacklevel=2)
         """ Deprecated since the version v1.12.0: This endpoint still works as before but is
             deprecated. Use /rest/config instead.
 
             Returns the current configuration.
 
-            >>> s = syncthing_factory().system
+            >>> c = ServiceConfig(...)
+            >>> s = System(c)
             >>> config = s.config()
             >>> config
             ... # doctest: +ELLIPSIS
             {...}
-            >>> 'version' in config and config['version'] >= 15
+            >>> 'version' in config and config.get('version') >= 15
             True
             >>> 'folders' in config
             True
@@ -110,8 +110,8 @@ class System(BaseAPI):
         """
         return self.get('config')
 
-    # DEPRECATED
     def set_config(self, config: dict, and_restart = False) -> None:
+        warnings.warn('System.set_config() is deprecated', DeprecationWarning, stacklevel=2)
         """ Deprecated since the version v1.12.0: This endpoint still works as before but is
             deprecated. Use Config Endpoints instead.
 
@@ -129,8 +129,8 @@ class System(BaseAPI):
         if and_restart:
             self.restart()
 
-    # DEPRECATED
     def config_insync(self) -> bool:
+        warnings.warn('System.config_insync() is deprecated', DeprecationWarning, stacklevel=2)
         """ Deprecated since the version v1.12.0: This endpoint still works as before but is
             deprecated. Use /rest/config/restart-required instead.
 
@@ -138,9 +138,7 @@ class System(BaseAPI):
             the same as that on disk.
         """
         status = self.get('config/insync').get('configInSync', False)
-        if status is None:
-            status = False
-        return status
+        return bool(status)
 
     def connections(self) -> dict:
         """ Returns the list of configured devices and some metadata associated with them.
@@ -148,13 +146,14 @@ class System(BaseAPI):
             The connection types are tcp-client, tcp-server, relay-client, relay-server,
             quic-client and quic-server.
 
-            >>> s = syncthing_factory().system
+            >>> c = ServiceConfig(...)
+            >>> s = System(c)
             >>> connections = s.connections()
             >>> sorted([k for k in connections.keys()])
             ['connections', 'total']
-            >>> isinstance(connections['connections'], dict)
+            >>> isinstance(connections.get('connections'), dict)
             True
-            >>> isinstance(connections['total'], dict)
+            >>> isinstance(connections.get('total'), dict)
             True
         """
         return self.get('connections')
@@ -185,7 +184,7 @@ class System(BaseAPI):
         """ Returns the list of recent errors.
 
             Returns:
-                list: of :obj:`.ErrorEvent` tuples.
+                list: of :obj:`.ErrorEvent` instances.
         """
         ret_errs = list()
         errors = self.get('error').get('errors', None) or list()
@@ -204,13 +203,14 @@ class System(BaseAPI):
             Args:
                 message (str): Plain-text message to display.
 
-            >>> s = syncthing_factory()
-            >>> s.system.show_error('my error msg')
-            >>> s.system.errors()[0]
+            >>> c = ServiceConfig(...)
+            >>> s = System(c)
+            >>> s.add_error('my error msg')
+            >>> s.errors()[0]
             ... # doctest: +ELLIPSIS
             ErrorEvent(when=datetime.datetime(...), message='my error msg')
-            >>> s.system.clear_errors()
-            >>> s.system.errors()
+            >>> s.clear_errors()
+            >>> s.errors()
             []
         """
         assert isinstance(message, str)
@@ -252,10 +252,8 @@ class System(BaseAPI):
             Returns:
                 dict: with keys ``success`` and ``error``.
         """
-        response = self.post('pause', params={'device': device}, return_response=True)
-        error = response.text
-        if not error:
-            error = None
+        response = self.raw_request('post', 'pause', params={'device': device})
+        error = response.text or None
         return {'success': response.status_code == requests.codes.ok, 'error': error}
 
     def ping(self, method: str = 'GET') -> dict:
@@ -306,9 +304,9 @@ class System(BaseAPI):
                 dict: with keys ``success`` and ``error``.
         """
         if device is None:
-            resp = self.post('resume', return_response=True)
+            resp = self.raw_request('post', 'resume')
         else:
-            resp = self.post('resume', params={'device': device}, return_response=True)
+            resp = self.raw_request('post', 'resume', params={'device': device})
 
         error = resp.text
         if not error:
@@ -349,7 +347,5 @@ class System(BaseAPI):
 
 __all__ = [
     'ErrorEvent',
-    'keys_to_datetime',
-    'parse_datetime',
     'System'
 ]

@@ -1,4 +1,7 @@
-from .BaseAPI import BaseAPI
+import warnings
+
+from .base_api import BaseAPI
+
 
 class Folder(BaseAPI):
     """ HTTP REST endpoint for Folder Services.
@@ -16,8 +19,8 @@ class Folder(BaseAPI):
         """
         return self.get('errors')
 
-    # DEPRECATED
     def pullerrors(self) -> dict:
+        warnings.warn('Folder.pullerrors() is deprecated', DeprecationWarning, stacklevel=2)
         """ Deprecated since the version v0.14.53: This endpoint still works as before but is
             deprecated. Use GET /rest/folder/errors instead, which returns the same information.
         """

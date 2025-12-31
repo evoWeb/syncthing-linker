@@ -1,4 +1,7 @@
-from .BaseAPI import BaseAPI
+import warnings
+
+from .base_api import BaseAPI
+
 
 class Debug(BaseAPI):
     """ HTTP REST endpoint for Debug calls.
@@ -8,42 +11,42 @@ class Debug(BaseAPI):
 
     prefix = '/rest/debug/'
 
-    # DEPRECATED
     def cpuprof(self) -> dict:
+        warnings.warn('Debug.cpuprof() is deprecated', DeprecationWarning, stacklevel=2)
         """ Used to capture a profile of what Syncthing is doing on the CPU. See Profiling.
 
-            >>> s = syncthing_factory().debug
-            >>> debug = s.debug()
-            >>> debug
+            >>> c = ServiceConfig(...)
+            >>> d = Debug(c)
+            >>> d
             ... #doctest: +ELLIPSIS
             {...}
-            >>> len(debug.keys())
+            >>> len(d.keys())
             2
-            >>> 'enabled' in debug and 'facilities' in debug
+            >>> 'enabled' in d and 'facilities' in d
             True
-            >>> isinstance(debug['enabled'], list) or debug['enabled'] is None
+            >>> isinstance(d.get('enabled'), list) or d.get('enabled') is None
             True
-            >>> isinstance(debug['facilities'], dict)
+            >>> isinstance(d.get('facilities'), dict)
             True
         """
         return self.get('cpuprof')
 
-    # DEPRECATED
     def heapprof(self) -> dict:
+        warnings.warn('Debug.heapprof() is deprecated', DeprecationWarning, stacklevel=2)
         """ Used to capture a profile of what Syncthing is doing with the heap memory. See Profiling.
 
-            >>> s = syncthing_factory().system
-            >>> debug = s.debug()
-            >>> debug
+            >>> c = ServiceConfig(...)
+            >>> d = Debug(c)
+            >>> d
             ... #doctest: +ELLIPSIS
             {...}
-            >>> len(debug.keys())
+            >>> len(d.keys())
             2
-            >>> 'enabled' in debug and 'facilities' in debug
+            >>> 'enabled' in d and 'facilities' in d
             True
-            >>> isinstance(debug['enabled'], list) or debug['enabled'] is None
+            >>> isinstance(d.get('enabled'), list) or d.get('enabled') is None
             True
-            >>> isinstance(debug['facilities'], dict)
+            >>> isinstance(d.get('facilities'), dict)
             True
         """
         return self.get('heapprof')

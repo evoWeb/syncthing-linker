@@ -1,4 +1,5 @@
-from .BaseAPI import BaseAPI
+from .base_api import BaseAPI
+
 
 class Statistics(BaseAPI):
     """ HTTP REST endpoint for Statistic calls.

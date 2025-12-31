@@ -1,9 +1,11 @@
-from requests.exceptions import Timeout
-from urllib3.exceptions import TimeoutError
+import requests
+import urllib3
+
 from typing import Generator
 
-from .BaseAPI import BaseAPI
-from .SyncthingException import SyncthingException
+from .base_api import BaseAPI
+from .service_config import ServiceConfig
+from .syncthing_exception import SyncthingException
 
 
 class Events(BaseAPI):
@@ -14,41 +16,25 @@ class Events(BaseAPI):
         Syncthing provides a simple long polling interface for exposing events
         from the core utility towards a GUI.
 
-        .. code-block:: python
-
-           syncthing = Syncthing()
-           event_stream = syncthing.events(limit=5)
-
-           for event in event_stream:
-               print(event)
-               if event_stream.count > 10:
-                   event_stream.stop()
+        >>> l = logging.Logger()
+        >>> c = ServiceConfig(...)
+        >>> event_stream = Events(c, limit=5)
     """
 
     prefix: str = '/rest/'
+    _count: int = 0
 
     def __init__(
         self,
-        api_key: str,
-        last_seen_id: int = None,
+        config: ServiceConfig,
+        last_seen_id: int = 0,
         filters: list[str] = None,
         limit: int = 10,
-        *args,
-        **kwargs
     ):
-        if 'timeout' not in kwargs:
-            # increase our timeout to account for long polling.
-            # this will reduce the number of timed-out connections, which are
-            # swallowed by the library anyway
-            kwargs['timeout'] = 60.0  #seconds
-
-        super(Events, self).__init__(api_key, *args, **kwargs)
+        super().__init__(config)
         self._last_seen_id = last_seen_id or 0
         self._filters = filters
         self._limit = limit
-
-        self._count = 0
-        self.blocking = True
 
     def events(
         self,
@@ -88,36 +74,23 @@ class Events(BaseAPI):
                 limit (int): The number of events to query in the history
                     to catch up to the current state.
         """
-
-        # coerce
-        if not isinstance(limit, (int, None)):
-            limit = None
-
-        # coerce
-        if filters is None:
-            filters = []
-
-        # reset the state if the loop was broken with `stop`
-        if not self.blocking:
-            self.blocking = True
+        filters = filters or []
 
         # block/long-poll for updates to the events api
-        while self.blocking:
+        while True:
             params: dict[str, str | int] = {
                 'since': self._last_seen_id,
-                'limit': limit,
+                'limit': limit or None,
             }
 
             if filters:
                 params['events'] = ','.join(filters)
 
             try:
-                data = self.get(using_url, params=params, raw_exceptions=True)
-            except (Timeout, TimeoutError):
+                data = self.get(using_url, params=params)
+            except (requests.exceptions.Timeout, requests.exceptions.ReadTimeout, urllib3.exceptions.TimeoutError) as e:
                 # swallow timeout errors for long polling
-                data = None
-            except Exception as e:
-                raise SyncthingException('', e)
+                raise SyncthingException('Timeout while fetching new events') from e
 
             if data:
                 for event in data:
@@ -126,7 +99,7 @@ class Events(BaseAPI):
                     yield event
                 # update our last_seen_id to move our event counter forward
                 last: dict = data[-1]
-                self._last_seen_id = last['id']
+                self._last_seen_id = last.get('id')
 
     def events_disk(self) -> Generator[dict]:
         """ This convenience endpoint provides the same event stream, but pre-filtered to show
@@ -135,10 +108,6 @@ class Events(BaseAPI):
         """
         for event in self.events('events/disk', None, self._limit):
             yield event
-
-    def stop(self) -> None:
-        """ Breaks the while-loop while the generator is polling for event changes. """
-        self.blocking = False
 
     @property
     def count(self) -> int:
@@ -152,5 +121,4 @@ class Events(BaseAPI):
 
     def __iter__(self) -> Generator[dict]:
         """ Helper interface for :obj:`._events` """
-        for event in self.events('events', self._filters, self._limit):
-            yield event
+        yield from self.events('events', self._filters, self._limit)
