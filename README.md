@@ -1,5 +1,3 @@
-# USE at OWN RISK
-
 # SyncThing Linker
 
 This tool links files from a source folder to a destination folder when a file was uploaded via Syncthing and the
@@ -12,10 +10,10 @@ By running `docker compose run -it syncthing-linker-linker python missing_files.
 on the host. For this to work, it's not necessary to have Syncthing running, but the syncthing-linker container must be
 running.
 
-# SERIOUSLY your OWN RISK
+# DONT USE THE docker-compose.yaml DIRECTLY
 
-This tool is tested on a debian server with docker installed. While it's not deleting files, it can create a lot of 
-unnecessary processing.
+If you have Syncthing running already on the same host, you shouldn't use the docker-compose.yaml directly
+but follow the installation instructions below.
 
 ## Prerequisites
 
@@ -114,7 +112,7 @@ FILES_FOLDER=/mnt/Docker/Syncthing/files
 SYNCTHING_API_KEY=
 ```
 
-# Overriding the default configuration
+## Overriding the default configuration
 
 If you need a different folder structure, you can override the default configuration by mounting a config.yaml file 
 into the container.
@@ -141,3 +139,13 @@ services:
     volumes:
       - base-folder:/base-folder
 ```
+
+## Development
+
+For development first start the container to connect to with `make development` and then connect to it
+with `make connect`. By that the files in /app can be modified, and the changes will be reflected in the
+running container.
+
+After wards the container needs to be rebuilt with `make build`, to check if everything works as expected.
+
+Pushing a new tag to the repository will trigger a new release to docker hub.

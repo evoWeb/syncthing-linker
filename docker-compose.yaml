@@ -9,12 +9,18 @@ volumes:
       o: bind
       type: none
       device: ${APP_FOLDER:-./app}
-  config:
+  linker-config:
     driver: local
     driver_opts:
       o: bind
       type: none
       device: ${CONFIG_FOLDER:-./config}
+  syncthing-config:
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: ${CONFIG_FOLDER:-./syncthing-config}
   files:
     driver: local
     driver_opts:
@@ -40,16 +46,35 @@ services:
     networks:
       - syncthing
 
+  syncthing:
+    image: lscr.io/linuxserver/syncthing:latest
+    volumes:
+      - syncthing-config:/config
+      - files:/files
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Berlin
+    ports:
+      - "8384:8384"
+      - "22000:22000/tcp"
+      - "22000:22000/udp"
+      - "21027:21027/udp"
+    restart: unless-stopped
+    networks:
+      - syncthing
+
   linker-development:
     image: evoweb/syncthing-linker:${TAG:-latest}
     build:
       context: .
       dockerfile: Dockerfile
+    profiles:
+      - donotstart
     command: sleep infinity
     volumes:
       - app:/usr/src/app
-
-      - config:/config
+      - linker-config:/config
       - files:/files
     environment:
       PUID: 1000
@@ -58,6 +83,5 @@ services:
       SYNCTHING_HOST: "${SYNCTHING_HOST:-syncthing}"
       SYNCTHING_PORT: "${SYNCTHING_PORT:-8384}"
       SYNCTHING_API_KEY: "${SYNCTHING_API_KEY}"
-    restart: no
     networks:
       - syncthing

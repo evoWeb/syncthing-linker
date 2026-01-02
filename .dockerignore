@@ -3,4 +3,5 @@
 .env
 _.env
 files/
+syncthing-config/
 **/__pycache__

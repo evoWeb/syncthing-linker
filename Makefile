@@ -8,7 +8,9 @@ SHELL := /bin/bash
 
 .PHONY: development
 development:
+	docker compose up -d syncthing
 	docker compose up linker-development --remove-orphans
+	docker compose down syncthing
 
 
 .PHONY: connect
