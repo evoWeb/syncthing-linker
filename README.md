@@ -3,6 +3,25 @@
 This tool links files from a source folder to a destination folder when a file was uploaded via Syncthing and the
 ItemFinished event was fired.
 
+The reason why you want this is that once the Hardlink is created, you can remove the file from the sync source without
+losing the file on the sync target. So if you have a file on a mobile device, with limited storage, at one moment you
+want to clear space on the device. Now the files from that device can be synchronized to the target and by that
+hardlink to the destination. Afterwards you can remove the files from the mobile device, which will also propagate to
+the synchronization target. If they weren't hardlink, the files would be lost.
+
+### without Syncthing Linker
+- create a file on a mobile device
+- synchronize to target
+- remove file from mobile device
+- the file is lost
+
+### with Syncthing Linker
+- create a file on a mobile device
+- synchronize to target
+- hardlink file to destination
+- remove file from mobile device
+- file is still present in destination
+
 If the linker didn't run for a while and events where lost, there is a script to check all files in the source if it's
 also present in destination.
 
