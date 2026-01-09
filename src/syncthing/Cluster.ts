@@ -12,6 +12,7 @@ export class ClusterAPI extends BaseAPI {
      * Valid values for the device parameter are those from the corresponding
      *
      * @param device string: Device ID.
+     * @returns Promise<{ success: boolean; error: string }>
      */
     async deletePendingDevice(device: string): Promise<{ success: boolean; error: string }> {
         const response = await this.delete<{ text: string }>('devices', { device: device });
@@ -21,9 +22,9 @@ export class ClusterAPI extends BaseAPI {
     /**
      * Lists remote devices which have tried to connect but are not yet configured in our instance.
      *
-     * @returns array
+     * @returns Promise<{}>
      */
-    async pendingDevices(): Promise<{}> {
+    pendingDevices(): Promise<{}> {
         return this.get('devices');
     }
 
@@ -37,6 +38,7 @@ export class ClusterAPI extends BaseAPI {
      *                 dict: with keys ``success`` and ``error``.
      * @param folder string: Folder path.
      * @param device string: Device ID.
+     * @returns Promise<{ success: boolean; error: string }>
      */
     async deletePendingFolders(folder: string, device?: string): Promise<{ success: boolean; error?: string }> {
         const response = await this.delete<{ text: string }>(
@@ -53,9 +55,9 @@ export class ClusterAPI extends BaseAPI {
      * instance to them. Takes the optional device parameter to only return folders offered by
      * a specific remote device. Other offering devices are also omitted from the result.
      *
-     * @returns array
+     * @returns Promise<{}>
      */
-    async pendingFolders(): Promise<{}> {
+    pendingFolders(): Promise<{}> {
         return this.get('folders');
     }
 }
