@@ -9,7 +9,7 @@ export class BaseAPI {
     // Placeholder for HTTP REST API URL prefix.
     protected prefix: string = '';
 
-    protected config: ServiceConfig;
+    protected serviceConfig: ServiceConfig;
     protected verify: boolean;
     protected headers: any;
     protected protocol: string;
@@ -21,7 +21,7 @@ export class BaseAPI {
             throw new SyncthingException(`ssl_cert_file does not exist at location, ${config.sslCertFile}`)
         }
 
-        this.config = config;
+        this.serviceConfig = config;
         this.verify = !!(config.sslCertFile || config.isHttps);
         this.headers = {
             'X-API-Key': config.apiKey
@@ -69,13 +69,13 @@ export class BaseAPI {
                 url: endpoint,
                 data: data,
                 params: params,
-                timeout: this.config.timeout,
+                timeout: this.serviceConfig.timeout,
                 headers: headers,
             };
 
-            if (this.config.isHttps && this.config.sslCertFile) {
+            if (this.serviceConfig.isHttps && this.serviceConfig.sslCertFile) {
                 axiosConfig.httpsAgent = new https.Agent({
-                    ca: fs.readFileSync(this.config.sslCertFile)
+                    ca: fs.readFileSync(this.serviceConfig.sslCertFile)
                 });
             }
 
