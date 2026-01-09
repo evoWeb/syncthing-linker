@@ -40,7 +40,7 @@ class Cluster(BaseAPI):
             Returns:
                 dict: with keys ``success`` and ``error``.
         """
-        response = self.raw_request('delete', 'devices', params={'folder': folder, 'device': device})
+        response = self.raw_request('delete', 'folders', params={'folder': folder, 'device': device})
         error = response.text or None
         return {'success': response.status_code == requests.codes.ok, 'error': error}
 
@@ -49,4 +49,4 @@ class Cluster(BaseAPI):
             instance to them. Takes the optional device parameter to only return folders offered by
             a specific remote device. Other offering devices are also omitted from the result.
         """
-        return self.delete('folders')
+        return self.get('folders')
