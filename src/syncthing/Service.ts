@@ -1,0 +1,94 @@
+import { BaseAPI } from './BaseAPI';
+
+export class Service extends BaseAPI {
+    /**
+     * HTTP REST endpoint for Misc Services.
+     * Implements endpoints of https://docs.syncthing.net/dev/rest.html#misc-services-endpoints
+     */
+    protected prefix = '/rest/svc/';
+
+    /**
+     * Verifies and formats a device ID. Accepts all currently valid formats (52 or 56
+     *             characters with or without separators, upper or lower case, with trivial
+     *             substitutions). Takes one parameter, id, and returns either a valid device ID in
+     *             modern format or an error.
+     *
+     *             Raises:
+     *                 SyncthingError: when ``device_id`` is an invalid length.
+     * @param id
+     */
+    async deviceId(id: string): Promise<string> {
+        const data: any = await this.get('deviceid', { id: id });
+        return data.id;
+    }
+
+    /**
+     * Returns a list of canonicalized localization codes, as picked up from the
+     *             Accept-Language header sent by the browser.
+     *
+     *             >>> c = ServiceConfig(...)
+     *             >>> s = Service(c)
+     *             >>> len(s.lang())
+     *             1
+     *             >>> s.lang()[0]
+     *             ''
+     *             >>> s.lang('en-us')
+     *             ['en-us']
+     *             >>> s.get('lang', headers={'Accept-Language': 'en-us'})
+     *             ['en-us']
+     * @param acceptLanguage
+     */
+    lang(acceptLanguage: string|undefined = undefined): Promise<string[]> {
+        const headers = acceptLanguage ? { 'Accept-Language': acceptLanguage } : undefined;
+        return this.get('lang', undefined, headers);
+    }
+
+    /**
+     * Returns a strong random generated string (alphanumeric) of the specified length.
+     *             Takes the length parameter.
+     *
+     *             Args:
+     *                 length (int): default ``32``.
+     *
+     *             >>> c = ServiceConfig(...)
+     *             >>> s = Service(c)
+     *             >>> len(s.random_string())
+     *             32
+     *             >>> len(s.random_string(32))
+     *             32
+     *             >>> len(s.random_string(1))
+     *             1
+     *             >>> len(s.random_string(0))
+     *             32
+     *             >>> len(s.random_string())
+     *             32
+     *             >>> import string
+     *             >>> all_letters = string.ascii_letters + string.digits
+     *             >>> all([c in all_letters for c in s.random_string(128)])
+     *             True
+     *             >>> all([c in all_letters for c in s.random_string(1024)])
+     *             True
+     * @param length
+     */
+    async randomString(length: number = 32): Promise<string> {
+        const data: any = await this.get('random/string', { length: length });
+        return data.random || '';
+    }
+
+    /**
+     * Returns the data sent in the anonymous usage report.
+     *
+     *             >>> c = ServiceConfig(...)
+     *             >>> s = Service(c)
+     *             >>> report = s.report()
+     *             >>> 'version' in report
+     *             True
+     *             >>> 'longVersion' in report
+     *             True
+     *             >>> 'syncthing v' in report.get('longVersion')
+     *             True
+     */
+    report(): Promise<{}> {
+        return this.get('report');
+    }
+}
