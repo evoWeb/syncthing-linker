@@ -71,7 +71,7 @@ services:
       dockerfile: Dockerfile
     profiles:
       - donotstart
-    command: sleep infinity
+    command: npm run dev
     volumes:
       - app:/usr/src/app
       - linker-config:/config

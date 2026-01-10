@@ -6,6 +6,21 @@ SHELL := /bin/bash
 .SILENT:
 
 
+.PHONY: update
+update:
+	docker run --rm -v "./app:/app" -w /app node:latest npm update
+
+
+.PHONY: install
+install:
+	docker run --rm -v "./app:/app" -w /app node:latest npm ci
+
+
+.PHONY: cleanup
+cleanup:
+	docker run --rm -v "./app:/app" -w /app node:latest rm -rf /app/node_modules
+
+
 .PHONY: development
 development:
 	docker compose up -d syncthing

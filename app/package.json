@@ -1,0 +1,22 @@
+{
+  "name": "syncthing-linker",
+  "version": "1.0.0",
+  "description": "Hardlinks Syncthing files based on events",
+  "main": "dist/main.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/main.js",
+    "scan": "node dist/MissingFilesScanner.js",
+    "dev": "ts-node-dev --respawn --transpile-only src/main.ts"
+  },
+  "dependencies": {
+    "axios": "^1.6.0",
+    "js-yaml": "^4.1.0"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "^4.0.5",
+    "@types/node": "^20.0.0",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.0.0"
+  }
+}

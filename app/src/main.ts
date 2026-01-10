@@ -13,10 +13,10 @@ import { initializeAppConfig, processSourcePath } from './utilities';
  * @param config ServiceConfig
  * @param logger Console
  */
-function checkServiceConfig(config: ServiceConfig, logger: Console): void {
+async function checkServiceConfig(config: ServiceConfig, logger: Console): Promise<void> {
     const system = new System(config);
 
-    const syncErrors = system.errors();
+    const syncErrors = await system.errors();
     system.clear();
 
     if (syncErrors.length > 0) {
@@ -51,7 +51,7 @@ async function main() {
     const logger: Console = console,
         appConfig = initializeAppConfig();
 
-    checkServiceConfig(appConfig, logger);
+    await checkServiceConfig(appConfig, logger);
     const config = new Config(appConfig);
     const database = new Database(appConfig);
     let lastSeenId: number = 0,
@@ -62,7 +62,7 @@ async function main() {
         const eventStream = new Events(appConfig, lastSeenId, appConfig.filters);
 
         try {
-            for await (const event of eventStream.poll()) {
+            for await (const event of eventStream) {
                 let sourcePath: string | null = getSourcePathForEvent(event, config, database);
                 if (!sourcePath) {
                     continue;

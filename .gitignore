@@ -1,4 +1,5 @@
 __pycache__
 /files/
+/app/node_modules/
 /syncthing-config/
 .env
