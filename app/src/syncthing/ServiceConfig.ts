@@ -1,5 +1,5 @@
 // in milliseconds
-export const DEFAULT_TIMEOUT = 10000;
+export const DEFAULT_TIMEOUT = 100000;
 
 export class ServiceConfig {
     constructor(

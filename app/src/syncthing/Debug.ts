@@ -27,7 +27,7 @@ export class Debug extends BaseAPI {
      *             True
      */
     cpuprof(): Promise<any> {
-        console.warn('Debug.cpuprof() is deprecated: Use Profiling endpoints instead');
+        this.logger.warn('Debug.cpuprof() is deprecated: Use Profiling endpoints instead');
         return this.get('cpuprof');
     }
 
@@ -51,7 +51,7 @@ export class Debug extends BaseAPI {
      *             True
      */
     heapprof(): Promise<{}> {
-        console.warn('Debug.heapprof() is deprecated: Use Profiling endpoints instead');
+        this.logger.warn('Debug.heapprof() is deprecated: Use Profiling endpoints instead');
         return this.get('heapprof');
     }
 

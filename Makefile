@@ -35,7 +35,7 @@ connect:
 
 .PHONY: missing_files
 missing_files:
-	docker compose exec linker-development python missing_files.py
+	docker compose run -it --rm linker node /usr/src/app/dist/missing_file.js
 
 
 .PHONY: build

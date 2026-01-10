@@ -27,6 +27,12 @@ volumes:
       o: bind
       type: none
       device: ${SOURCE_FOLDER:-./files}
+  logs:
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: ${LOG_FOLDER:-./logs}
 
 services:
   linker:
@@ -71,11 +77,12 @@ services:
       dockerfile: Dockerfile
     profiles:
       - donotstart
-    command: npm run dev
+    command: sleep infinity
     volumes:
       - app:/usr/src/app
       - linker-config:/config
       - files:/files
+      - logs:/logs
     environment:
       PUID: 1000
       PGID: 1000

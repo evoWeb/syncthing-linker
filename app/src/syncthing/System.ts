@@ -118,7 +118,7 @@ export class System extends BaseAPI {
      *             True
      */
     config(): Promise<any> {
-        console.warn('System.config() is deprecated: Use Config instead.');
+        this.logger.warn('System.config() is deprecated: Use Config instead.');
         return this.get('config')
     }
 
@@ -136,7 +136,7 @@ export class System extends BaseAPI {
      *             necessary parts and post it again.
      */
     setConfig(config: any, andRestart: boolean = false): void {
-        console.warn('System.setConfig() is deprecated: Use Config.restartRequired instead.');
+        this.logger.warn('System.setConfig() is deprecated: Use Config.restartRequired instead.');
         this.post('config', config).then(() => {
             if (andRestart) {
                 this.restart();
@@ -152,7 +152,7 @@ export class System extends BaseAPI {
      *             the same as that on disk.
      */
     async configInsync(): Promise<boolean> {
-        console.warn('System.configInsync() is deprecated: Use Config.restartRequired instead.');
+        this.logger.warn('System.configInsync() is deprecated: Use Config.restartRequired instead.');
         const response = await this.get<{configInSync: boolean}>('config/insync')
         return !!(response.configInSync || false);
     }
@@ -333,7 +333,7 @@ export class System extends BaseAPI {
      *             folder parameter with a valid folder ID, only information for that folder will be erased
      */
     reset(): void {
-        console.warn('This is a destructive action that cannot be undone.');
+        this.logger.warn('This is a destructive action that cannot be undone.');
         this.post('reset', {});
     }
 
@@ -347,7 +347,7 @@ export class System extends BaseAPI {
      * @param folder
      */
     resetFolder(folder: string): void {
-        console.warn('This is a destructive action that cannot be undone.');
+        this.logger.warn('This is a destructive action that cannot be undone.');
         this.post('reset', {}, undefined, { folder: folder });
     }
 

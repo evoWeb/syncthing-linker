@@ -3,6 +3,7 @@ import * as path from 'path';
 import * as yaml from 'js-yaml';
 
 import { AppConfig } from './AppConfig';
+import { Logger } from './Logger';
 
 export function initializeAppConfig(configPath: string = '/config/config.yaml') {
     const fileContents = fs.readFileSync(configPath, 'utf8'),
@@ -84,4 +85,9 @@ function sourcePathIsQualified(sourcePath: string, appConfig: AppConfig, logger:
         return false;
     }
     return true;
+}
+
+export function getLogger(): Console {
+    const logfilePath = process.env.LOG_PATH || '/logs/linker-' + (new Date().toISOString()) +  '.log';
+    return new Logger(logfilePath);
 }

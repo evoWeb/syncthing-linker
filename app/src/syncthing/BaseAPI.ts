@@ -78,8 +78,10 @@ export class BaseAPI {
                     ca: fs.readFileSync(this.serviceConfig.sslCertFile)
                 });
             }
-
+//this.logger.log(axiosConfig);
             result = await axios.request<T>(axiosConfig);
+//this.logger.log(result);
+//this.logger.log('');
         } catch (error: any) {
             if (axios.isAxiosError(error)) {
                 throw new SyncthingException('HTTP request error', { cause: error });

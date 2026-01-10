@@ -3,5 +3,6 @@
 .env
 _.env
 files/
+logs/
 syncthing-config/
 **/__pycache__

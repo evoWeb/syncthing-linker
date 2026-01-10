@@ -5,7 +5,7 @@ import { Database } from './syncthing/Database';
 import { Events } from './syncthing/Events';
 import { System } from './syncthing/System';
 import { ServiceConfig } from './syncthing/ServiceConfig';
-import { initializeAppConfig, processSourcePath } from './utilities';
+import { initializeAppConfig, processSourcePath, getLogger } from './utilities';
 
 /**
  * Checks the connection to the Syncthing API
@@ -48,7 +48,7 @@ function sleep(ms: number) {
 }
 
 async function main() {
-    const logger: Console = console,
+    const logger: Console = getLogger(),
         appConfig = initializeAppConfig();
 
     await checkServiceConfig(appConfig, logger);

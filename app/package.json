@@ -6,8 +6,8 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/main.js",
-    "scan": "node dist/MissingFilesScanner.js",
-    "dev": "ts-node-dev --respawn --transpile-only src/main.ts"
+    "dev": "ts-node-dev --respawn src/main.ts",
+    "missing-files": "npx tsc && node dist/missing_file.ts"
   },
   "dependencies": {
     "axios": "^1.6.0",
