@@ -52,8 +52,8 @@ async function main() {
         appConfig = initializeAppConfig();
 
     await checkServiceConfig(appConfig, logger);
-    const config = new Config(appConfig);
-    const database = new Database(appConfig);
+    const config = new Config(appConfig),
+        database = new Database(appConfig);
     let lastSeenId: number = 0,
         continueWorking: boolean = true;
 
@@ -63,6 +63,7 @@ async function main() {
 
         try {
             for await (const event of eventStream) {
+                logger.log(event);
                 let sourcePath: string | null = getSourcePathForEvent(event, config, database);
                 if (!sourcePath) {
                     continue;
@@ -75,6 +76,7 @@ async function main() {
                 continueWorking = false;
             });
         } catch (error) {
+            //logger.error(error);
             await sleep(5000);
         }
     }
