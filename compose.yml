@@ -70,7 +70,7 @@ services:
     networks:
       - syncthing
 
-  linker-development:
+  development:
     image: evoweb/syncthing-linker:${TAG:-latest}
     build:
       context: .

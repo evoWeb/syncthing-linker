@@ -24,13 +24,13 @@ cleanup:
 .PHONY: development
 development:
 	docker compose up -d syncthing
-	docker compose up linker-development --remove-orphans
+	docker compose up development --remove-orphans
 	docker compose down syncthing
 
 
 .PHONY: connect
 connect:
-	docker compose exec linker-development sh
+	docker compose exec development /entrypoint.sh /bin/sh
 
 
 .PHONY: missing_files
@@ -40,6 +40,6 @@ missing_files:
 
 .PHONY: build
 build:
-	TAG=latest docker compose build linker-development
+	TAG=latest docker compose build development
 	docker image tag evoweb/syncthing-linker:latest evoweb/syncthing-linker:v1.0.0
 .DEFAULT_GOAL := build
