@@ -59,11 +59,11 @@ async function main() {
 
     logger.log('Waiting for events');
     while (continueWorking) {
-        const eventStream = new Events(appConfig, lastSeenId, appConfig.filters);
+        const eventStream = new Events(appConfig, logger, lastSeenId, appConfig.filters);
 
         try {
             for await (const event of eventStream) {
-                logger.log(event);
+                logger.log(JSON.stringify(event));
                 let sourcePath: string | null = getSourcePathForEvent(event, config, database);
                 if (!sourcePath) {
                     continue;
@@ -76,8 +76,8 @@ async function main() {
                 continueWorking = false;
             });
         } catch (error) {
-            //logger.error(error);
-            await sleep(5000);
+            logger.error(error);
+            await sleep(appConfig.timeout);
         }
     }
 }

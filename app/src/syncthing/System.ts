@@ -154,7 +154,7 @@ export class System extends BaseAPI {
     async configInsync(): Promise<boolean> {
         this.logger.warn('System.configInsync() is deprecated: Use Config.restartRequired instead.');
         const response = await this.get<{configInSync: boolean}>('config/insync')
-        return !!(response.configInSync || false);
+        return (response.configInSync || false);
     }
 
     /**
@@ -412,7 +412,7 @@ export class System extends BaseAPI {
      */
     async canUpgrade(): Promise<boolean> {
         const response = await this.get<{newer: boolean}>('upgrade');
-        return !!(response && response.newer);
+        return (response && response.newer);
     }
 
     /**

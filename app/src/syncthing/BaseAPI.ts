@@ -16,7 +16,7 @@ export class BaseAPI {
     protected url: string;
     protected logger: Console;
 
-    constructor(config: ServiceConfig) {
+    constructor(config: ServiceConfig, logger?: Console) {
         if (config.sslCertFile && !fs.existsSync(config.sslCertFile)) {
             throw new SyncthingException(`ssl_cert_file does not exist at location, ${config.sslCertFile}`)
         }
@@ -28,7 +28,7 @@ export class BaseAPI {
         }
         this.protocol = config.isHttps ? 'https' : 'http';
         this.url = `${this.protocol}://${config.host}:${config.port}`;
-        this.logger = console;
+        this.logger = logger || console;
     }
 
     protected async raw_request<T>(
@@ -69,7 +69,7 @@ export class BaseAPI {
                 url: endpoint,
                 data: data,
                 params: params,
-                timeout: this.serviceConfig.timeout,
+                timeout: this.serviceConfig.timeout * 1000,
                 headers: headers,
             };
 
@@ -78,10 +78,7 @@ export class BaseAPI {
                     ca: fs.readFileSync(this.serviceConfig.sslCertFile)
                 });
             }
-//this.logger.log(axiosConfig);
             result = await axios.request<T>(axiosConfig);
-//this.logger.log(result);
-//this.logger.log('');
         } catch (error: any) {
             if (axios.isAxiosError(error)) {
                 throw new SyncthingException('HTTP request error', { cause: error });

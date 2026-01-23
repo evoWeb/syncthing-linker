@@ -22,8 +22,8 @@ export class Events extends BaseAPI {
     private _lastSeenId: number;
     private _count: number = 0;
 
-    constructor(config: ServiceConfig, lastSeenId: number = 0, filters?: string[], limit: number= 10) {
-        super(config);
+    constructor(config: ServiceConfig, logger: Console, lastSeenId: number = 0, filters?: string[], limit: number= 10) {
+        super(config, logger);
         this._lastSeenId = lastSeenId;
         this.filters = filters;
         this.limit = limit;
@@ -73,6 +73,10 @@ export class Events extends BaseAPI {
 
             if (limit !== null) {
                 params['limit'] = limit;
+            }
+
+            if (this.serviceConfig.timeout > 0) {
+                params['timeout'] = this.serviceConfig.timeout;
             }
 
             if (filters && filters.length > 0) {
