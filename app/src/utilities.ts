@@ -27,7 +27,7 @@ export function initializeAppConfig(configPath: string = '/config/config.yaml') 
         apiKey,
         host,
         port,
-        10,
+        60,
         isHttps,
         sslCertFile,
         config.source || '/files/source/',

@@ -22,7 +22,7 @@ export class Events extends BaseAPI {
     private _lastSeenId: number;
     private _count: number = 0;
 
-    constructor(config: ServiceConfig, logger: Console, lastSeenId: number = 0, filters?: string[], limit: number= 10) {
+    constructor(config: ServiceConfig, logger: Console, lastSeenId: number = 0, filters?: string[], limit: number = 50) {
         super(config, logger);
         this._lastSeenId = lastSeenId;
         this.filters = filters;
