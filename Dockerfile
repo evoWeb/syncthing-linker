@@ -2,9 +2,12 @@
 FROM node:20-alpine AS builder
 
 WORKDIR /build
+
+COPY app/eslint.config.mjs ./
 COPY app/package*.json ./
 COPY app/tsconfig.json ./
 COPY app/src ./src
+
 RUN npm install
 RUN npm run build
 

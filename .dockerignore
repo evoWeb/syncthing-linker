@@ -2,6 +2,8 @@
 .github
 .env
 _.env
+app/node_modules/
+app/dist/
 files/
 logs/
 syncthing-config/
