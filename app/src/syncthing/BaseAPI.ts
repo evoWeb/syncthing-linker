@@ -141,7 +141,7 @@ export class BaseAPI {
       data = {};
     }
 
-    if (headers !== undefined) {
+    if (headers === undefined) {
       headers = {};
     }
 
