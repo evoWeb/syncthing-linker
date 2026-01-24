@@ -28,7 +28,8 @@ async function checkServiceConfig(config: ServiceConfig, logger: Console): Promi
 async function getSourcePathForEvent(
   event: { data: { error: string, folder: string, item: string } },
   config: Config,
-  database: Database
+  database: Database,
+  logger: Console
 ): Promise<string | null> {
   const data = event.data || {};
   let sourcePath: string = '';
@@ -39,7 +40,7 @@ async function getSourcePathForEvent(
   try {
     const folder = await config.folder(data.folder),
       file = await database.file(data.folder, data.item);
-    console.log(folder, file);
+    logger.log(folder, file);
     sourcePath = path.join(folder.path, file.local.name);
   } catch (error: any) {
     return null;
@@ -74,7 +75,7 @@ async function main() {
     try {
       for await (const event of eventStream) {
         logger.log(JSON.stringify(event));
-        let sourcePath: string | null = await getSourcePathForEvent(event, config, database);
+        let sourcePath: string | null = await getSourcePathForEvent(event, config, database, logger);
         if (!sourcePath) {
           continue;
         }

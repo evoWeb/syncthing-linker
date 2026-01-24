@@ -96,6 +96,9 @@ export function getLogger(): Console {
     year = now.getFullYear(),
     month = String(now.getMonth() + 1).padStart(2, '0'),
     day = String(now.getDate()).padStart(2, '0'),
-    logfilePath = process.env.LOG_PATH || `/logs/linker-${year}${month}${day}.log`;
+    customLogPath = process.env.LOG_PATH?.trim(),
+    logfilePath = (customLogPath && customLogPath.length > 0)
+      ? customLogPath
+      : `/logs/linker-${year}${month}${day}.log`;
   return new Logger(logfilePath);
 }
