@@ -50,7 +50,7 @@ async function getSourcePathForEvent(
 }
 
 function sleep(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 async function main() {
@@ -84,7 +84,7 @@ async function main() {
       }
     } catch (error: any) {
       logger.error(error);
-      await sleep(appConfig.timeout);
+      await sleep(appConfig.timeout * 1000);
     }
   }
 }
