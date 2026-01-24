@@ -75,7 +75,7 @@ export class Service extends BaseAPI {
    * @param id
    */
   async deviceId(id: string): Promise<string> {
-    const data: any = await this.get('deviceid', { id: id });
+    const data = await this.get<{ id: string }>('deviceid', { id: id });
     return data.id;
   }
 
@@ -96,7 +96,10 @@ export class Service extends BaseAPI {
    * @param acceptLanguage
    */
   lang(acceptLanguage: string | undefined = undefined): Promise<string[]> {
-    const headers = acceptLanguage ? { 'Accept-Language': acceptLanguage } : undefined;
+    let headers = undefined;
+    if (acceptLanguage) {
+      headers = { 'Accept-Language': acceptLanguage };
+    }
     return this.get('lang', undefined, headers);
   }
 
@@ -128,7 +131,7 @@ export class Service extends BaseAPI {
    * @param length
    */
   async randomString(length: number = 32): Promise<string> {
-    const data: any = await this.get('random/string', { length: length });
+    const data = await this.get<{ random: string }>('random/string', { length: length });
     return data.random || '';
   }
 

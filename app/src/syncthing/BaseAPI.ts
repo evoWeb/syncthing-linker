@@ -15,8 +15,8 @@ export interface RequestData {
 }
 
 export interface RequestHeaders {
-  [key: string]: any;
   'X-API-Key'?: string;
+  'Accept-Language'?: string;
 }
 
 export interface RequestParameters {
@@ -152,7 +152,7 @@ export class BaseAPI {
       throw new Error('Headers must be an object');
     }
 
-    let result: any;
+    let result: AxiosResponse<T>;
     try {
       headers = Object.assign(headers, this.headers);
 
@@ -162,6 +162,7 @@ export class BaseAPI {
         data: data,
         params: params,
         timeout: this.serviceConfig.timeout * 1000,
+        // @ts-expect-error header gets converted to AxiosHeaders
         headers: headers,
       };
 
@@ -171,10 +172,12 @@ export class BaseAPI {
         });
       }
       result = await axios.request<T>(axiosConfig);
+      /* eslint-disable @typescript-eslint/no-explicit-any */
     } catch (error: any) {
       if (axios.isAxiosError(error)) {
         throw new SyncthingException('HTTP request error', { cause: error });
       }
+      result = error.response;
     }
     return result;
   }

@@ -2,6 +2,20 @@ import { BaseAPI, RequestParameters } from './BaseAPI';
 import { ServiceConfig } from './ServiceConfig';
 import { SyncthingException } from './SyncthingException';
 
+export interface Event {
+  id: number;
+  globalID: number;
+  time: string;
+  type: string;
+  data: {
+    action: string;
+    error: string | null;
+    folder: string;
+    item: string;
+    type: string;
+  };
+}
+
 export class Events extends BaseAPI {
   /**
    * HTTP REST endpoints for Event-based calls.
@@ -79,7 +93,11 @@ export class Events extends BaseAPI {
    * @param filters
    * @param limit
    */
-  async* events(usingUrl: string, filters: string[] | null = null, limit: number | null = null): AsyncGenerator<any> {
+  async* events(
+    usingUrl: string,
+    filters: string[] | null = null,
+    limit: number | null = null
+  ): AsyncGenerator<Event> {
     const params: RequestParameters = {
       since: this.lastSeenId,
     };
@@ -97,7 +115,7 @@ export class Events extends BaseAPI {
     }
 
     try {
-      const data: any[] = await this.get(usingUrl, undefined, undefined, params);
+      const data = await this.get<Event[]>(usingUrl, undefined, undefined, params);
       if (data && data.length > 0) {
         for (const event of data) {
           this._count++;
@@ -105,6 +123,7 @@ export class Events extends BaseAPI {
         }
         this._lastSeenId = data[data.length - 1].id;
       }
+      /* eslint-disable @typescript-eslint/no-explicit-any */
     } catch (error: any) {
       throw new SyncthingException('Timeout while fetching new events', { cause: error });
     }
@@ -115,14 +134,14 @@ export class Events extends BaseAPI {
    *                 only LocalChangeDetected and RemoteChangeDetected event types. The events parameter
    *                 is not used.
    */
-  async* eventsDisk(): AsyncGenerator<any> {
+  async* eventsDisk(): AsyncGenerator<Event> {
     yield* this.events('events/disk', null, this.limit);
   }
 
   /**
    * Helper interface for events.
    */
-  async* [Symbol.asyncIterator](): AsyncGenerator<any> {
+  async* [Symbol.asyncIterator](): AsyncGenerator<Event> {
     yield* this.events('events', this.filters || null, this.limit);
   }
 }

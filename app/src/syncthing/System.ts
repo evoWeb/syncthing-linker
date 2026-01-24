@@ -67,20 +67,24 @@ interface SystemConnections {
  * @param object the JSON-like object to modify.
  * @param keys keys of the object being converted into Date instances.
  */
-function keysToDatetime(object: any, ...keys: string[]): any {
+function keysToDatetime<T extends Record<string, Date | null | string | number>>(object: T, ...keys: (keyof T)[]): T {
   if (!object || keys.length === 0) {
     return object;
   }
-  for (const key of keys) {
-    if (!(key in object)) {
-      continue;
+
+  if (typeof object === 'object') {
+    for (const key of keys) {
+      if (!(key in object)) {
+        continue;
+      }
+      const value = object[key];
+      if (typeof value !== 'string') {
+        continue;
+      }
+      object[key] = parseDatetime(value) as T[keyof T];
     }
-    const value = object[key];
-    if (typeof value !== 'string') {
-      continue;
-    }
-    object[key] = parseDatetime(value);
   }
+
   return object;
 }
 
@@ -248,10 +252,10 @@ export class System extends BaseAPI {
    *                 list: of :obj:`.ErrorEvent` instances.
    */
   async errors(): Promise<ErrorEvent[]> {
-    const response: any = await this.get<{ errors: any }>('error');
+    const response = await this.get<{ errors: { when: string, message: string }[] }>('error');
     const errors = response.errors || [];
     const result: ErrorEvent[] = [];
-    errors.map((error: any) => {
+    errors.map((error: { when: string, message: string }) => {
       const when = parseDatetime(error.when);
       const message = error.message || '';
       result.push(new ErrorEvent(when, message));
@@ -335,6 +339,7 @@ export class System extends BaseAPI {
     try {
       await this.post('pause', undefined, undefined, { device: device });
       return { success: true, error: null };
+      /* eslint-disable @typescript-eslint/no-explicit-any */
     } catch (error: any) {
       return { success: false, error: error.message || 'Unknown error' };
     }
@@ -406,6 +411,7 @@ export class System extends BaseAPI {
       const params = device ? { device: device } : undefined;
       await this.post('resume', undefined, undefined, params);
       return { success: true, error: null };
+      /* eslint-disable @typescript-eslint/no-explicit-any */
     } catch (error: any) {
       return { success: false, error: error.message || 'Unknown error' };
     }
@@ -422,9 +428,9 @@ export class System extends BaseAPI {
    * Returns information about current system status and resource usage. The CPU percent
    *             value has been deprecated from the API and will always report 0.
    */
-  async status(): Promise<{ cpuPercent: number }> {
-    const response: any = await this.get('status');
-    response.startTime = keysToDatetime(response.startTime || null);
+  async status(): Promise<{ startTime: string | Date | null }> {
+    const response = await this.get<{ startTime: string }>('status');
+    keysToDatetime<{ startTime: string }>(response, 'startTime');
     return response;
   }
 

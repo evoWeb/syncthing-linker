@@ -143,6 +143,6 @@ export class Debug extends BaseAPI {
    * @param file
    */
   file(folder: string, file: string): Promise<FileDetails> {
-    return this.post('file', {}, { folder: folder, file: file });
+    return this.post('file', undefined, undefined, { folder: folder, file: file });
   }
 }

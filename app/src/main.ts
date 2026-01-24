@@ -2,7 +2,7 @@ import * as path from 'path';
 
 import { Config } from './syncthing/Config';
 import { Database } from './syncthing/Database';
-import { Events } from './syncthing/Events';
+import { Events, Event } from './syncthing/Events';
 import { System } from './syncthing/System';
 import { ServiceConfig } from './syncthing/ServiceConfig';
 import { initializeAppConfig, processSourcePath, getLogger } from './utilities';
@@ -26,17 +26,17 @@ async function checkServiceConfig(config: ServiceConfig, logger: Console): Promi
 }
 
 async function getSourcePathForEvent(
-  event: { data: { error: string, folder: string, item: string } },
+  event: Event,
   config: Config,
   database: Database,
   logger: Console
 ): Promise<string | null> {
   const data = event.data || {};
-  let sourcePath: string = '';
   if (data.error || (!data.folder && !data.item)) {
     return null;
   }
 
+  let sourcePath: string = '';
   try {
     const folder = await config.folder(data.folder),
       file = await database.file(data.folder, data.item);

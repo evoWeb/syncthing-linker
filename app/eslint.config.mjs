@@ -43,7 +43,7 @@ export default [...compat.extends(
         "@typescript-eslint/no-restricted-types": "error",
         "@typescript-eslint/no-unsafe-function-type": "error",
         "@typescript-eslint/no-wrapper-object-types": "error",
-        "@typescript-eslint/no-explicit-any": "on",
+        "@typescript-eslint/no-explicit-any": "error",
         "@typescript-eslint/no-this-alias": "error",
         "@typescript-eslint/no-unused-vars": "error",
         "@typescript-eslint/member-ordering": "error",
