@@ -18,8 +18,17 @@ fi
 # Get the username for PUID
 USER_NAME=$(getent passwd ${PUID} | cut -d: -f1)
 
-# Fix ownership of app directories
-chown -R ${PUID}:${PGID} /usr/src/app /config
+# Fix ownership of app directories only if needed
+for dir in /usr/src/app /config; do
+    if [ -d "$dir" ]; then
+        CURRENT_UID=$(stat -c '%u' "$dir")
+        CURRENT_GID=$(stat -c '%g' "$dir")
+        if [ "$CURRENT_UID" != "$PUID" ] || [ "$CURRENT_GID" != "$PGID" ]; then
+            echo "Fixing ownership of $dir (${CURRENT_UID}:${CURRENT_GID} -> ${PUID}:${PGID})"
+            chown -R ${PUID}:${PGID} "$dir"
+        fi
+    fi
+done
 
 # Drop privileges and run as the user
 exec su-exec ${USER_NAME} "$@"
