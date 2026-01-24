@@ -8,6 +8,24 @@ export class Logger implements Console {
 
   constructor(logFilePath: string) {
     this.logWriter = fs.createWriteStream(logFilePath, {flags: 'a', mode: 0o644});
+    this.registerCleanupHandlers();
+  }
+
+  private registerCleanupHandlers(): void {
+    process.on('exit', () => this.close());
+    process.on('SIGINT', () => this.close());
+    process.on('SIGTERM', () => this.close());
+    process.on('uncaughtException', error => {
+      this.error('Uncaught exception:', error);
+      this.close();
+      process.exit(1);
+    });
+  }
+
+  public close(): void {
+    if (this.logWriter && !this.logWriter.closed) {
+      this.logWriter.end();
+    }
   }
 
   private write(level: string, ...args: any[]): void {

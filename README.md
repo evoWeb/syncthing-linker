@@ -4,7 +4,7 @@ This tool links files from a source folder to a destination folder when a file w
 `ItemFinished` event was fired.
 
 The reason why you want this is that once the Hardlink is created, you can remove the file from the sync source without
-losing the file on the sync target. This is ideal for devices with limited storage (like mobile phones). You sync to the 
+losing the file on the sync target. This is ideal for devices with limited storage (like mobile phones). You sync to the
 target, the linker creates a hardlink, and then you can safely delete the file from your phone.
 
 ### Flow comparison
@@ -25,7 +25,7 @@ docker compose exec linker python missing_files.py
 ```
 Note: The container must be running for this command to work.
 
-# DONT USE THE docker-compose.yaml DIRECTLY
+# DONT USE THE compose.yml DIRECTLY
 
 If you have Syncthing running already on the same host, you should integrate the linker into your existing setup as
 described below.
@@ -83,7 +83,7 @@ services:
 
 ## Installation
 
-The linker needs the **Syncthing API key** to connect to the Syncthing server. This key can be found in the Syncthing web 
+The linker needs the **Syncthing API key** to connect to the Syncthing server. This key can be found in the Syncthing web
 interface under `Actions → Settings → API Key`.
 
 ![settings.png](images/settings.png)
