@@ -40,7 +40,7 @@ async function getSourcePathForEvent(
   try {
     const folder = await config.folder(data.folder),
       file = await database.file(data.folder, data.item);
-    logger.log(folder, file);
+    logger.info(folder, file);
     sourcePath = path.join(folder.path, file.local.name);
   } catch (error: any) {
     return null;
@@ -68,13 +68,13 @@ async function main() {
     continueWorking = false;
   });
 
-  logger.log('Waiting for events');
+  logger.info('Waiting for events');
   while (continueWorking) {
     const eventStream = new Events(appConfig, logger, lastSeenId, appConfig.filters);
 
     try {
       for await (const event of eventStream) {
-        logger.log(JSON.stringify(event));
+        logger.info(JSON.stringify(event));
         let sourcePath: string | null = await getSourcePathForEvent(event, config, database, logger);
         if (!sourcePath) {
           continue;
