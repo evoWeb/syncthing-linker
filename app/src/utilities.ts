@@ -88,6 +88,14 @@ function sourcePathIsQualified(sourcePath: string, appConfig: AppConfig, logger:
 }
 
 export function getLogger(): Console {
-    const logfilePath = process.env.LOG_PATH || '/logs/linker-' + (new Date().toISOString()) +  '.log';
+    if (!process.env.WRITE_LOGS) {
+        return console;
+    }
+
+    const now = new Date(),
+        year = now.getFullYear(),
+        month = String(now.getMonth() + 1).padStart(2, '0'),
+        day = String(now.getDate()).padStart(2, '0'),
+        logfilePath = process.env.LOG_PATH || `/logs/linker-${year}${month}${day}.log`;
     return new Logger(logfilePath);
 }

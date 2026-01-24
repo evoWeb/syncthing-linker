@@ -90,5 +90,6 @@ services:
       SYNCTHING_HOST: "${SYNCTHING_HOST:-syncthing}"
       SYNCTHING_PORT: "${SYNCTHING_PORT:-8384}"
       SYNCTHING_API_KEY: "${SYNCTHING_API_KEY}"
+      WRITE_LOGS: true
     networks:
       - syncthing
