@@ -28,4 +28,11 @@ RUN npm install --production
 COPY --from=builder /build/dist ./dist
 COPY config /config
 
+HEALTHCHECK \
+    --interval=30s \
+    --timeout=10s \
+    --start-period=5s \
+    --retries=3 \
+    CMD pgrep -f "node dist/main.js" || exit 1
+
 CMD ["node", "dist/main.js"]
