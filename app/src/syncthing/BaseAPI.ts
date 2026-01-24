@@ -73,9 +73,9 @@ export class BaseAPI {
                 headers: headers,
             };
 
-            if (this.serviceConfig.isHttps && this.serviceConfig.sslCertFile) {
+            if (this.verify && this.serviceConfig.sslCertFile) {
                 axiosConfig.httpsAgent = new https.Agent({
-                    ca: fs.readFileSync(this.serviceConfig.sslCertFile)
+                    ca: fs.readFileSync(this.serviceConfig.sslCertFile, 'utf8')
                 });
             }
             result = await axios.request<T>(axiosConfig);

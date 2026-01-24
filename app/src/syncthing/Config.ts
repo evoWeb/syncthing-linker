@@ -57,7 +57,7 @@ export class Config extends BaseAPI {
      * returns the folder/device for the given ID
      * @param folder string: Folder ID.
      */
-    folder(folder: string): Promise<{}> {
+    folder(folder: string): Promise<{path: string}> {
         return this.get(`folders/${folder}`)
     }
 }

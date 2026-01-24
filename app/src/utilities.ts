@@ -27,7 +27,7 @@ export function initializeAppConfig(configPath: string = '/config/config.yaml') 
         apiKey,
         host,
         port,
-        60,
+        parseInt(process.env.SYNCTHING_TIMEOUT || '60'),
         isHttps,
         sslCertFile,
         config.source || '/files/source/',
@@ -51,8 +51,8 @@ function linkSourceToDestination(sourcePath: string, destinationPath: string, lo
     try {
         fs.linkSync(sourcePath, destinationPath);
         logger.info(`Linked ${sourcePath} to ${destinationPath}`);
-    } catch (e) {
-        logger.error(`Error linking ${sourcePath} to ${destinationPath}:`, e);
+    } catch (error: any) {
+        logger.error(`Error linking ${sourcePath} to ${destinationPath}:`, error);
     }
 }
 
@@ -64,7 +64,7 @@ export function processSourcePath(sourcePath: string, appConfig: AppConfig, logg
     const relative = path.relative(appConfig.source, sourcePath),
         destinationPath = path.join(appConfig.destination, relative);
     
-    linkSourceToDestination(sourcePath, destinationPath, console);
+    linkSourceToDestination(sourcePath, destinationPath, logger);
 }
 
 function sourcePathIsQualified(sourcePath: string, appConfig: AppConfig, logger: Console): boolean {

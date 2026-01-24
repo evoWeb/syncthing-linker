@@ -7,7 +7,7 @@ export class Logger implements Console {
     public Console: typeof console.Console = console.Console;
 
     constructor(logFilePath: string) {
-        this.logWriter = fs.createWriteStream(logFilePath, { flags : 'a', mode: 0o666 });
+        this.logWriter = fs.createWriteStream(logFilePath, { flags : 'a', mode: 0o644 });
     }
 
     private write(level: string, ...args: any[]): void {

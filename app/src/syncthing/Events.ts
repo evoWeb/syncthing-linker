@@ -66,35 +66,33 @@ export class Events extends BaseAPI {
      * @param limit
      */
     async *events(usingUrl: string, filters: string[] | null = null, limit: number | null = null): AsyncGenerator<any> {
-        while (true) {
-            let params: any = {
-                since: this.lastSeenId,
-            };
+        let params: any = {
+            since: this.lastSeenId,
+        };
 
-            if (limit !== null) {
-                params['limit'] = limit;
-            }
+        if (limit !== null) {
+            params['limit'] = limit;
+        }
 
-            if (this.serviceConfig.timeout > 0) {
-                params['timeout'] = this.serviceConfig.timeout;
-            }
+        if (this.serviceConfig.timeout > 0) {
+            params['timeout'] = this.serviceConfig.timeout;
+        }
 
-            if (filters && filters.length > 0) {
-                params['events'] = filters.join(',');
-            }
+        if (filters && filters.length > 0) {
+            params['events'] = filters.join(',');
+        }
 
-            try {
-                const data: any[] = await this.get(usingUrl, undefined, undefined, params);
-                if (data && data.length > 0) {
-                    for (const event of data) {
-                        this._count++;
-                        yield event;
-                    }
-                    this._lastSeenId = data[data.length - 1].id;
+        try {
+            const data: any[] = await this.get(usingUrl, undefined, undefined, params);
+            if (data && data.length > 0) {
+                for (const event of data) {
+                    this._count++;
+                    yield event;
                 }
-            } catch (e: any) {
-                throw new SyncthingException(`Timeout while fetching new events: ${e.message}`);
+                this._lastSeenId = data[data.length - 1].id;
             }
+        } catch (error: any) {
+            throw new SyncthingException('Timeout while fetching new events', { cause: error });
         }
     }
 

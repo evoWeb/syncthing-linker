@@ -306,8 +306,8 @@ export class System extends BaseAPI {
         try {
             await this.post('pause', undefined, undefined, { device: device });
             return { success: true, error: null };
-        } catch (e: any) {
-            return { success: false, error: e.message || 'Unknown error' };
+        } catch (error: any) {
+            return { success: false, error: error.message || 'Unknown error' };
         }
     }
 
@@ -377,8 +377,8 @@ export class System extends BaseAPI {
             let params = device ? { device: device } : undefined;
             await this.post('resume', undefined, undefined, params);
             return { success: true, error: null };
-        } catch (e: any) {
-            return { success: false, error: e.message || 'Unknown error' };
+        } catch (error: any) {
+            return { success: false, error: error.message || 'Unknown error' };
         }
     }
 

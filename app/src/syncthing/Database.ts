@@ -61,7 +61,7 @@ export class Database extends BaseAPI {
      * @param folder
      * @param file
      */
-    file(folder: string, file: string): Promise<{}> {
+    file(folder: string, file: string): Promise<{local: {name: string}}> {
         return this.get('file', undefined, undefined, { folder: folder, file: file });
     }
 

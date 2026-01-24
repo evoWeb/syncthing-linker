@@ -25,7 +25,11 @@ async function checkServiceConfig(config: ServiceConfig, logger: Console): Promi
     }
 }
 
-function getSourcePathForEvent(event: any, config: any, database: any): string | null {
+async function getSourcePathForEvent(
+    event: {data: {error: string, folder: string, item: string}},
+    config: Config,
+    database: Database
+): Promise<string | null> {
     const data = event.data || {};
     let sourcePath: string = '';
     if (data.error || (!data.folder && !data.item)) {
@@ -33,10 +37,11 @@ function getSourcePathForEvent(event: any, config: any, database: any): string |
     }
 
     try {
-        const folder: any = config.folder(data.folder),
-            file = database.file(data.folder, data.item);
-        sourcePath = path.join(folder.path, file.get('local').name);
-    } catch (error) {
+        const folder = await config.folder(data.folder),
+            file = await database.file(data.folder, data.item);
+        console.log(folder, file);
+        sourcePath = path.join(folder.path, file.local.name);
+    } catch (error: any) {
         return null;
     }
 
@@ -57,6 +62,11 @@ async function main() {
     let lastSeenId: number = 0,
         continueWorking: boolean = true;
 
+    process.on('SIGINT', () => {
+        logger.info('Stop waiting for events')
+        continueWorking = false;
+    });
+
     logger.log('Waiting for events');
     while (continueWorking) {
         const eventStream = new Events(appConfig, logger, lastSeenId, appConfig.filters);
@@ -64,18 +74,14 @@ async function main() {
         try {
             for await (const event of eventStream) {
                 logger.log(JSON.stringify(event));
-                let sourcePath: string | null = getSourcePathForEvent(event, config, database);
+                let sourcePath: string | null = await getSourcePathForEvent(event, config, database);
                 if (!sourcePath) {
                     continue;
                 }
                 processSourcePath(sourcePath, appConfig, logger);
                 lastSeenId = event.id;
             }
-            process.on('SIGINT', () => {
-                logger.info('Stop waiting for events')
-                continueWorking = false;
-            });
-        } catch (error) {
+        } catch (error: any) {
             logger.error(error);
             await sleep(appConfig.timeout);
         }
