@@ -49,7 +49,7 @@ export class BaseAPI {
   protected url: string;
   protected logger: Console;
 
-  constructor(config: ServiceConfig, logger?: Console) {
+  constructor(config: ServiceConfig, logger: Console) {
     if (config.sslCertFile && !fs.existsSync(config.sslCertFile)) {
       throw new SyncthingException(`ssl_cert_file does not exist at location, ${config.sslCertFile}`);
     }
@@ -61,7 +61,7 @@ export class BaseAPI {
     };
     this.protocol = config.isHttps ? 'https' : 'http';
     this.url = `${this.protocol}://${config.host}:${config.port}`;
-    this.logger = logger || console;
+    this.logger = logger;
   }
 
   async get<T>(
@@ -145,10 +145,10 @@ export class BaseAPI {
       headers = {};
     }
 
-    if (typeof data !== 'object' || data === null || Array.isArray(data)) {
+    if (typeof data !== 'object' || Array.isArray(data)) {
       throw new Error('Data must be an object');
     }
-    if (typeof headers !== 'object' || headers === null || Array.isArray(headers)) {
+    if (typeof headers !== 'object' || Array.isArray(headers)) {
       throw new Error('Headers must be an object');
     }
 
@@ -157,13 +157,12 @@ export class BaseAPI {
       headers = Object.assign(headers, this.headers);
 
       const axiosConfig: AxiosRequestConfig = {
-        method: method,
         url: endpoint,
-        data: data,
+        method: method,
+        headers: headers as object,
         params: params,
+        data: data,
         timeout: this.serviceConfig.timeout * 1000,
-        // @ts-expect-error header gets converted to AxiosHeaders
-        headers: headers,
       };
 
       if (this.verify && this.serviceConfig.sslCertFile) {

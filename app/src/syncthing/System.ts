@@ -109,6 +109,10 @@ function parseDatetime(dateString: string): Date | null {
   return date;
 }
 
+function isKeyOfRequestData(key: string, obj: RequestData): key is keyof RequestData {
+  return key in obj;
+}
+
 export class System extends BaseAPI {
   /**
    * HTTP REST endpoint for System calls.
@@ -311,7 +315,11 @@ export class System extends BaseAPI {
    * @param level Level to set.
    */
   setLoglevels(facility: string, level: string): void {
-    this.post('loglevels', { [facility]: level });
+    let data = undefined;
+    if (isKeyOfRequestData(facility, {} as RequestData)) {
+      data = { [facility]: level };
+    }
+    this.post('loglevels', data);
   }
 
   /**

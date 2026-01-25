@@ -1,4 +1,4 @@
-import { BaseAPI } from './BaseAPI';
+import { BaseAPI, RequestData } from './BaseAPI';
 
 interface FolderError {
   path: string;
@@ -17,8 +17,6 @@ interface FileVersion {
   modTime: string;
   size: number;
 }
-
-type FileVersions = Record<string, FileVersion[]>;
 
 export class FolderAPI extends BaseAPI {
   /**
@@ -54,7 +52,7 @@ export class FolderAPI extends BaseAPI {
    *             in bytes.
    * @param folder
    */
-  async versions(folder: string): Promise<FileVersions> {
+  async versions(folder: string): Promise<Record<string, FileVersion[]>> {
     return this.get('versions', undefined, undefined, { folder: folder });
   }
 
@@ -70,6 +68,6 @@ export class FolderAPI extends BaseAPI {
    * @param files
    */
   restoreVersions(folder: string, files: Record<string, string>): void {
-    this.post('versions', files, undefined, { folder: folder });
+    this.post('versions', files as RequestData, undefined, { folder: folder });
   }
 }

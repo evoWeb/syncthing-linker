@@ -3,19 +3,20 @@ import * as path from 'path';
 
 import { initializeAppConfig, processSourcePath } from './utilities';
 
-function walkSync(dir: string, callback: (filePath: string) => void) {
-  fs.readdirSync(dir).forEach(file => {
-    const filePath = path.join(dir, file);
-    const stat = fs.statSync(filePath);
-    if (stat.isDirectory()) {
-      walkSync(filePath, callback);
-    } else {
-      callback(filePath);
-    }
-  });
+function walkSync(dir: string, callback: (filePath: string) => void): void {
+  fs.readdirSync(dir)
+    .forEach(file => {
+      const filePath = path.join(dir, file);
+      const stat = fs.statSync(filePath);
+      if (stat.isDirectory()) {
+        walkSync(filePath, callback);
+      } else {
+        callback(filePath);
+      }
+    });
 }
 
-async function main() {
+async function main(): Promise<void> {
   const logger: Console = console,
     appConfig = initializeAppConfig();
 

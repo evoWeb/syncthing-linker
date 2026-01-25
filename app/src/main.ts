@@ -14,7 +14,7 @@ import { initializeAppConfig, processSourcePath, getLogger } from './utilities';
  * @param logger Console
  */
 async function checkServiceConfig(config: ServiceConfig, logger: Console): Promise<void> {
-  const system = new System(config);
+  const system = new System(config, logger);
 
   const syncErrors = await system.errors();
   system.clear();
@@ -49,7 +49,7 @@ async function getSourcePathForEvent(
   return sourcePath;
 }
 
-function sleep(ms: number) {
+function sleep(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
@@ -58,8 +58,9 @@ async function main(): Promise<void> {
     appConfig = initializeAppConfig();
 
   await checkServiceConfig(appConfig, logger);
-  const config = new Config(appConfig),
-    database = new Database(appConfig);
+  const config = new Config(appConfig, logger),
+    database = new Database(appConfig, logger);
+
   let lastSeenId: number = 0,
     continueWorking: boolean = true;
 
