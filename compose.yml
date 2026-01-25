@@ -38,13 +38,14 @@ services:
   linker:
     image: evoweb/syncthing-linker:${TAG:-latest}
     volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
       # source and destination folders need to be subfolders of files
       # @see config/config.yaml line 1-2
       - files:/files
     environment:
       PUID: 1000
       PGID: 1000
-      TZ: Europe/Berlin
       SYNCTHING_HOST: "${SYNCTHING_HOST:-syncthing}"
       SYNCTHING_PORT: "${SYNCTHING_PORT:-8384}"
       SYNCTHING_API_KEY: "${SYNCTHING_API_KEY}"
@@ -55,12 +56,14 @@ services:
   syncthing:
     image: lscr.io/linuxserver/syncthing:latest
     volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
       - syncthing-config:/config
+      # Should contain the same folders as in the linker service
       - files:/files
     environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=Europe/Berlin
+      PUID: 1000
+      PGID: 1000
     ports:
       - "8384:8384"
       - "22000:22000/tcp"
@@ -79,6 +82,8 @@ services:
       - donotstart
     command: sleep infinity
     volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
       - app:/usr/src/app
       - linker-config:/config
       - files:/files
@@ -86,7 +91,6 @@ services:
     environment:
       PUID: 1000
       PGID: 1000
-      TZ: Europe/Berlin
       SYNCTHING_HOST: "${SYNCTHING_HOST:-syncthing}"
       SYNCTHING_PORT: "${SYNCTHING_PORT:-8384}"
       SYNCTHING_API_KEY: "${SYNCTHING_API_KEY}"
