@@ -1,4 +1,4 @@
-import BaseAPI from './BaseAPI';
+import RequestBase from './RequestBase';
 
 interface FolderUses {
   ignorePerms: number;
@@ -57,7 +57,7 @@ interface UsageReport {
   upgradeAllowedAuto: boolean;
 }
 
-export default class Service extends BaseAPI {
+export default class Service extends RequestBase {
   /**
    * HTTP REST endpoint for Misc Services.
    * Implements endpoints of https://docs.syncthing.net/dev/rest.html#misc-services-endpoints

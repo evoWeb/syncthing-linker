@@ -1,6 +1,6 @@
-import BaseAPI from './BaseAPI';
+import RequestBase from './RequestBase';
 
-export default class Config extends BaseAPI {
+export default class Config extends RequestBase {
   /**
    * HTTP REST endpoint for Config calls.
    * Implements endpoints of https://docs.syncthing.net/dev/rest.html#config-endpoints

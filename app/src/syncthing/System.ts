@@ -1,5 +1,5 @@
-import BaseAPI from './BaseAPI';
-import { RequestData, RequestParameters } from './BaseAPI';
+import RequestBase from './RequestBase';
+import { RequestData, RequestParameters } from './RequestBase';
 
 class ErrorEvent {
   /**
@@ -114,7 +114,7 @@ function isKeyOfRequestData(key: string, obj: RequestData): key is keyof Request
   return key in obj;
 }
 
-export default class System extends BaseAPI {
+export default class System extends RequestBase {
   /**
    * HTTP REST endpoint for System calls.
    * Implements endpoints of https://docs.syncthing.net/dev/rest.html#system-endpoints

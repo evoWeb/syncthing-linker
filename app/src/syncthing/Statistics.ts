@@ -1,4 +1,4 @@
-import BaseAPI from './BaseAPI';
+import RequestBase from './RequestBase';
 
 interface Progress {
   lastScan: string;
@@ -10,7 +10,7 @@ interface Progress {
 
 type FolderScan = Record<string, Progress>;
 
-export default class Statistics extends BaseAPI {
+export default class Statistics extends RequestBase {
   /**
    * HTTP REST endpoint for Statistic calls.
    * Implements endpoints of https://docs.syncthing.net/dev/rest.html#statistics-endpoints

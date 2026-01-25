@@ -1,4 +1,4 @@
-import BaseAPI from './BaseAPI';
+import RequestBase from './RequestBase';
 
 interface FolderData {
   modTime: string;
@@ -62,7 +62,7 @@ interface FolderStatus {
   version: number;
 }
 
-export default class Database extends BaseAPI {
+export default class Database extends RequestBase {
   /**
    * HTTP REST endpoint for Database calls.
    * Implements endpoints of https://docs.syncthing.net/dev/rest.html#database-endpoints

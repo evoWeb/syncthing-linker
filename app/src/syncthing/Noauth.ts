@@ -1,6 +1,6 @@
-import BaseAPI from './BaseAPI';
+import RequestBase from './RequestBase';
 
-export default class Noauth extends BaseAPI {
+export default class Noauth extends RequestBase {
   /**
    * HTTP REST endpoint for Noauth Services.
    * Implements endpoints of https://docs.syncthing.net/dev/rest.html#noauth-endpoints

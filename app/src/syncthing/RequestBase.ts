@@ -38,7 +38,7 @@ export interface RequestParameters {
 }
 
 
-export default class BaseAPI {
+export default class RequestBase {
   // Placeholder for HTTP REST API URL prefix.
   protected prefix: string = '';
 
