@@ -40,7 +40,9 @@ async function getSourcePathForEvent(
   try {
     const folder = await config.folder(data.folder),
       file = await database.file(data.folder, data.item);
-    logger.info(folder, file);
+    if (file.local.blocksHash === null) {
+      return null;
+    }
     sourcePath = path.join(folder.path, file.local.name);
   } catch (error) {
     return null;
@@ -74,12 +76,12 @@ async function main(): Promise<void> {
 
     try {
       for await (const event of eventStream) {
-        lastSeenId = event.id;
         logger.info(JSON.stringify(event));
         let sourcePath: string | null = await getSourcePathForEvent(event, config, database, logger);
         if (!sourcePath) {
           continue;
         }
+        lastSeenId = event.id;
         if (['delete'].includes(event.data.action)) {
           logger.info('Skip item deletion')
           continue;
@@ -87,11 +89,8 @@ async function main(): Promise<void> {
         processSourcePath(sourcePath, appConfig, logger);
       }
     } catch (error: any) {
-      if (error.message.includes('timeout')) {
-        await sleep(appConfig.timeout * 1000);
-        continue;
-      }
       logger.error(error);
+      await sleep(appConfig.timeout * 1000);
     }
   }
 }

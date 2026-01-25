@@ -131,7 +131,7 @@ export class Database extends BaseAPI {
    * @param folder
    * @param file
    */
-  file(folder: string, file: string): Promise<{ local: { name: string } }> {
+  file(folder: string, file: string): Promise<{ local: { name: string, blocksHash: string | null } }> {
     return this.get('file', undefined, undefined, { folder: folder, file: file });
   }
 
