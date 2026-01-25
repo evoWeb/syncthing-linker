@@ -1,4 +1,4 @@
-import { BaseAPI } from './BaseAPI';
+import BaseAPI from './BaseAPI';
 
 interface XAttr {
   name: string;
@@ -67,7 +67,7 @@ interface FileDetails {
   mtime: Mtime;
 }
 
-export class Debug extends BaseAPI {
+export default class Debug extends BaseAPI {
   /**
    * HTTP REST endpoint for Debug calls.
    * Implements endpoints of https://docs.syncthing.net/dev/rest.html#debug-endpoints

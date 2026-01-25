@@ -1,7 +1,7 @@
 // in seconds
 export const DEFAULT_TIMEOUT = 100;
 
-export class ServiceConfig {
+export default class ServiceConfig {
   constructor(
     public apiKey: string,
     public host: string = 'localhost',

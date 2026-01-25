@@ -1,6 +1,7 @@
-import { BaseAPI, RequestParameters } from './BaseAPI';
-import { ServiceConfig } from './ServiceConfig';
-import { SyncthingException } from './SyncthingException';
+import BaseAPI from './BaseAPI';
+import { RequestParameters } from './BaseAPI';
+import ServiceConfig from './ServiceConfig';
+import SyncthingException from './SyncthingException';
 
 export interface EventData {
   action: string;

@@ -1,8 +1,8 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
-import { AppConfig } from './AppConfig';
-import { processSourcePath } from './utilities';
+import AppConfig from './AppConfig';
+import processSourcePath from './processSourcePath';
 
 function walkSync(directory: string, callback: (filePath: string) => void): void {
   fs.readdirSync(directory)

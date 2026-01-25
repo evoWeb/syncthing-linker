@@ -1,13 +1,13 @@
 import * as path from 'path';
 
-import { Config } from './syncthing/Config';
-import { Database } from './syncthing/Database';
+import Config from './syncthing/Config';
+import Database from './syncthing/Database';
 import { Events, Event, EventData } from './syncthing/Events';
-import { System } from './syncthing/System';
-import { ServiceConfig } from './syncthing/ServiceConfig';
-import { AppConfig } from './AppConfig';
-import { Logger } from './Logger';
-import { processSourcePath } from './utilities';
+import System from './syncthing/System';
+import ServiceConfig from './syncthing/ServiceConfig';
+import AppConfig from './AppConfig';
+import Logger from './Logger';
+import processSourcePath from './processSourcePath';
 
 /**
  * Checks the connection to the Syncthing API

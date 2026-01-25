@@ -31,7 +31,7 @@ function rotateOldLogs(logDirectory: string): void {
   }
 }
 
-export class Logger implements Console {
+export default class Logger implements Console {
   protected channel: string;
   protected logWriter: WriteStream;
   public Console: typeof console.Console = console.Console;

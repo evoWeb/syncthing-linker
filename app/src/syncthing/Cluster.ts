@@ -1,4 +1,4 @@
-import { BaseAPI } from './BaseAPI';
+import BaseAPI from './BaseAPI';
 
 interface DeviceInfo {
   time: string;
@@ -21,7 +21,7 @@ type PendingFolders = Record<string, {
   offeredBy: Record<string, FolderOffer>;
 }>;
 
-export class ClusterAPI extends BaseAPI {
+export default class Cluster extends BaseAPI {
   /**
    * HTTP REST endpoint for Cluster Services.
    * Implements endpoints of https://docs.syncthing.net/dev/rest.html#cluster-endpoints

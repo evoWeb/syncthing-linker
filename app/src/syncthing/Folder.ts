@@ -1,4 +1,5 @@
-import { BaseAPI, RequestData } from './BaseAPI';
+import BaseAPI from './BaseAPI';
+import { RequestData } from './BaseAPI';
 
 interface FolderError {
   path: string;
@@ -18,7 +19,7 @@ interface FileVersion {
   size: number;
 }
 
-export class FolderAPI extends BaseAPI {
+export default class Folder extends BaseAPI {
   /**
    * HTTP REST endpoint for Folder Services.
    * Implements endpoints of https://docs.syncthing.net/dev/rest.html#folder-endpoints

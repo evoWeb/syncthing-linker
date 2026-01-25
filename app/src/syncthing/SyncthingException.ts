@@ -1,4 +1,4 @@
-export class SyncthingException extends Error {
+export default class SyncthingException extends Error {
   /**
    * Base Syncthing Exception class all non-assertion errors will raise from.
    */

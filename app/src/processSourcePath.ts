@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
-import { AppConfig } from './AppConfig';
+import AppConfig from './AppConfig';
 
 function sourcePathIsQualified(sourcePath: string, appConfig: AppConfig, logger: Console): boolean {
   if (!fs.existsSync(sourcePath)) {
@@ -42,7 +42,7 @@ function linkSourceToDestination(sourcePath: string, destinationPath: string, lo
   }
 }
 
-export function processSourcePath(sourcePath: string, appConfig: AppConfig, logger: Console): void {
+export default function processSourcePath(sourcePath: string, appConfig: AppConfig, logger: Console): void {
   if (!sourcePathIsQualified(sourcePath, appConfig, logger)) {
     return;
   }

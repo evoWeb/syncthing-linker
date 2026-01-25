@@ -2,8 +2,8 @@ import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 import * as fs from 'fs';
 import * as https from 'https';
 
-import { SyncthingException } from './SyncthingException';
-import { ServiceConfig } from './ServiceConfig';
+import SyncthingException from './SyncthingException';
+import ServiceConfig from './ServiceConfig';
 
 export interface RequestData {
   device?: string;
@@ -38,7 +38,7 @@ export interface RequestParameters {
 }
 
 
-export class BaseAPI {
+export default class BaseAPI {
   // Placeholder for HTTP REST API URL prefix.
   protected prefix: string = '';
 
