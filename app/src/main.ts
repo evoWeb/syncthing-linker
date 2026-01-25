@@ -77,19 +77,25 @@ async function main(): Promise<void> {
     try {
       for await (const event of eventStream) {
         logger.info(JSON.stringify(event));
+
+        if (['delete'].includes(event.data.action)) {
+          lastSeenId = event.id;
+          continue;
+        }
+
         let sourcePath: string | null = await getSourcePathForEvent(event, config, database, logger);
         if (!sourcePath) {
           continue;
         }
+
         lastSeenId = event.id;
-        if (['delete'].includes(event.data.action)) {
-          logger.info('Skip item deletion')
-          continue;
-        }
         processSourcePath(sourcePath, appConfig, logger);
       }
     } catch (error: any) {
-      logger.error(error);
+      // Timeout exceptions aren't logged because the next request continues where the previous ended.
+      if (error.message !== 'Timeout while fetching new events') {
+        logger.error(error);
+      }
       await sleep(appConfig.timeout * 1000);
     }
   }
