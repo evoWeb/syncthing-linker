@@ -3,10 +3,12 @@ import { WriteStream } from 'fs';
 import { format } from 'util';
 
 export class Logger implements Console {
+  protected channel: string;
   protected logWriter: WriteStream;
   public Console: typeof console.Console = console.Console;
 
-  constructor(logFilePath: string) {
+  constructor(logFilePath: string, channel?: string) {
+    this.channel = channel?.toLowerCase() || '';
     this.logWriter = fs.createWriteStream(logFilePath, {flags: 'a', mode: 0o644});
     this.registerCleanupHandlers();
   }
@@ -30,13 +32,15 @@ export class Logger implements Console {
 
   private write(level: string, ...args: any[]): void {
     const message = format(...args);
-    const timestamp = new Date().toISOString();
-    const output = `${timestamp} [${level.toUpperCase()}]: ${message}\n`;
+    const timestamp = (new Date()).toISOString().slice(0, -1) + '000+00:00';
+    const channel = this.channel ? `${this.channel}.` : '';
+    const output = `[${timestamp}] ${channel}${level.toUpperCase()}: ${message}\n`;
 
     // Write to a file
     try {
       this.logWriter.write(output);
     } catch (error) {}
+
     // Also write to stdout/stderr for visibility
     if (level === 'error' || level === 'warn') {
       process.stderr.write(output);

@@ -115,7 +115,7 @@ function rotateOldLogs(logDirectory: string): void {
   }
 }
 
-export function getLogger(): Console {
+export function getLogger(channel?: string): Console {
   if (!process.env.WRITE_LOGS) {
     return console;
   }
@@ -124,13 +124,13 @@ export function getLogger(): Console {
     year = now.getFullYear(),
     month = String(now.getMonth() + 1).padStart(2, '0'),
     day = String(now.getDate()).padStart(2, '0'),
-    customLogPath = process.env.LOG_PATH?.trim(),
-    logfilePath = (customLogPath && customLogPath.length > 0)
-      ? customLogPath
+    logPathOverride = process.env.LOG_PATH?.trim(),
+    logfilePath = (logPathOverride && logPathOverride.length > 0)
+      ? logPathOverride
       : `/logs/linker-${year}${month}${day}.log`;
 
   const logDirectory = path.dirname(logfilePath);
   rotateOldLogs(logDirectory);
 
-  return new Logger(logfilePath);
+  return new Logger(logfilePath, channel);
 }

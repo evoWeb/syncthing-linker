@@ -56,12 +56,13 @@ function sleep(ms: number): Promise<void> {
 }
 
 async function main(): Promise<void> {
-  const logger: Console = getLogger(),
+  const logger: Console = getLogger('main'),
+    eventLogger: Console = getLogger('event'),
     appConfig = initializeAppConfig();
 
-  await checkServiceConfig(appConfig, logger);
-  const config = new Config(appConfig, logger),
-    database = new Database(appConfig, logger);
+  await checkServiceConfig(appConfig, getLogger('system'));
+  const config = new Config(appConfig, getLogger('config')),
+    database = new Database(appConfig, getLogger('database'));
 
   let lastSeenId: number = 0,
     continueWorking: boolean = true;
@@ -72,11 +73,11 @@ async function main(): Promise<void> {
 
   logger.info('Waiting for events');
   while (continueWorking) {
-    const eventStream = new Events(appConfig, logger, lastSeenId, appConfig.filters);
+    const eventStream = new Events(appConfig, eventLogger, lastSeenId, appConfig.filters);
 
     try {
       for await (const event of eventStream) {
-        logger.info(JSON.stringify(event));
+        eventLogger.info(JSON.stringify(event));
 
         if (['delete'].includes(event.data.action)) {
           lastSeenId = event.id;
