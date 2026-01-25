@@ -1,5 +1,4 @@
-import RequestBase from './RequestBase';
-import { RequestData, RequestParameters } from './RequestBase';
+import RequestBase, { RequestData, RequestParameters } from './RequestBase';
 
 class ErrorEvent {
   /**

@@ -2,7 +2,7 @@ import * as path from 'path';
 
 import Config from './syncthing/Config';
 import Database from './syncthing/Database';
-import { Events, Event, EventData } from './syncthing/Events';
+import Events, { Event, EventData } from './syncthing/Events';
 import System from './syncthing/System';
 import ServiceConfig from './syncthing/ServiceConfig';
 import AppConfig from './AppConfig';

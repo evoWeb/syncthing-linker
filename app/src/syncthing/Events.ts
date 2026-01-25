@@ -1,5 +1,4 @@
-import RequestBase from './RequestBase';
-import { RequestParameters } from './RequestBase';
+import RequestBase, { RequestParameters } from './RequestBase';
 import ServiceConfig from './ServiceConfig';
 import SyncthingException from './SyncthingException';
 
@@ -19,7 +18,7 @@ export interface Event {
   data: EventData;
 }
 
-export class Events extends RequestBase {
+export default class Events extends RequestBase {
   /**
    * HTTP REST endpoints for Event-based calls.
    *

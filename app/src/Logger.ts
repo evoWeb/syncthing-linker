@@ -1,5 +1,4 @@
-import fs from 'fs';
-import { WriteStream } from 'fs';
+import fs, { WriteStream } from 'fs';
 import * as path from 'path';
 import { format } from 'util';
 

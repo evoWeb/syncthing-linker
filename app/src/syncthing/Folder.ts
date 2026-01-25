@@ -1,5 +1,4 @@
-import RequestBase from './RequestBase';
-import { RequestData } from './RequestBase';
+import RequestBase, { RequestData } from './RequestBase';
 
 interface FolderError {
   path: string;

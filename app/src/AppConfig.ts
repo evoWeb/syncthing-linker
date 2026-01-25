@@ -1,8 +1,7 @@
 import * as fs from 'fs';
 import * as yaml from 'js-yaml';
 
-import ServiceConfig from './syncthing/ServiceConfig';
-import { DEFAULT_TIMEOUT } from './syncthing/ServiceConfig';
+import ServiceConfig, { DEFAULT_TIMEOUT } from './syncthing/ServiceConfig';
 
 export default class AppConfig extends ServiceConfig {
   constructor(
