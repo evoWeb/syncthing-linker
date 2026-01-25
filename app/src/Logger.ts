@@ -34,7 +34,9 @@ export class Logger implements Console {
     const output = `${timestamp} [${level.toUpperCase()}]: ${message}\n`;
 
     // Write to a file
-    this.logWriter.write(output);
+    try {
+      this.logWriter.write(output);
+    } catch (error) {}
     // Also write to stdout/stderr for visibility
     if (level === 'error' || level === 'warn') {
       process.stderr.write(output);

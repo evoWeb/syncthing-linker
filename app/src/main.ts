@@ -2,7 +2,7 @@ import * as path from 'path';
 
 import { Config } from './syncthing/Config';
 import { Database } from './syncthing/Database';
-import { Events, Event } from './syncthing/Events';
+import { Events, Event, EventData } from './syncthing/Events';
 import { System } from './syncthing/System';
 import { ServiceConfig } from './syncthing/ServiceConfig';
 import { initializeAppConfig, processSourcePath, getLogger } from './utilities';
@@ -31,8 +31,8 @@ async function getSourcePathForEvent(
   database: Database,
   logger: Console
 ): Promise<string | null> {
-  const data = event.data || {};
-  if (data.error || (!data.folder && !data.item)) {
+  const data: EventData = event.data || { action: 'error', error: 'No data' };
+  if (data.error || (!data.folder || !data.item)) {
     return null;
   }
 
@@ -42,7 +42,7 @@ async function getSourcePathForEvent(
       file = await database.file(data.folder, data.item);
     logger.info(folder, file);
     sourcePath = path.join(folder.path, file.local.name);
-  } catch (error: any) {
+  } catch (error) {
     return null;
   }
 
@@ -53,7 +53,7 @@ function sleep(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-async function main() {
+async function main(): Promise<void> {
   const logger: Console = getLogger(),
     appConfig = initializeAppConfig();
 
@@ -64,7 +64,6 @@ async function main() {
     continueWorking: boolean = true;
 
   process.on('SIGINT', () => {
-    logger.info('Stop waiting for events')
     continueWorking = false;
   });
 
@@ -74,17 +73,24 @@ async function main() {
 
     try {
       for await (const event of eventStream) {
+        lastSeenId = event.id;
         logger.info(JSON.stringify(event));
         let sourcePath: string | null = await getSourcePathForEvent(event, config, database, logger);
         if (!sourcePath) {
           continue;
         }
+        if (['delete'].includes(event.data.action)) {
+          logger.info('Skip item deletion')
+          continue;
+        }
         processSourcePath(sourcePath, appConfig, logger);
-        lastSeenId = event.id;
       }
     } catch (error: any) {
+      if (error.message.includes('timeout')) {
+        await sleep(appConfig.timeout * 1000);
+        continue;
+      }
       logger.error(error);
-      await sleep(appConfig.timeout * 1000);
     }
   }
 }

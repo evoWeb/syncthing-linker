@@ -5,7 +5,7 @@ import * as yaml from 'js-yaml';
 import { AppConfig } from './AppConfig';
 import { Logger } from './Logger';
 
-export function initializeAppConfig(configPath: string = '/config/config.yaml') {
+export function initializeAppConfig(configPath: string = '/config/config.yaml'): AppConfig {
   const fileContents = fs.readFileSync(configPath, 'utf8'),
     config: any = yaml.load(fileContents);
 
@@ -37,7 +37,7 @@ export function initializeAppConfig(configPath: string = '/config/config.yaml') 
   );
 }
 
-function linkSourceToDestination(sourcePath: string, destinationPath: string, logger: Console) {
+function linkSourceToDestination(sourcePath: string, destinationPath: string, logger: Console): void {
   const destinationParent = path.dirname(destinationPath);
   if (!fs.existsSync(destinationParent)) {
     fs.mkdirSync(destinationParent, {recursive: true});
@@ -51,12 +51,12 @@ function linkSourceToDestination(sourcePath: string, destinationPath: string, lo
   try {
     fs.linkSync(sourcePath, destinationPath);
     logger.info(`Linked ${sourcePath} to ${destinationPath}`);
-  } catch (error: any) {
+  } catch (error) {
     logger.error(`Error linking ${sourcePath} to ${destinationPath}:`, error);
   }
 }
 
-export function processSourcePath(sourcePath: string, appConfig: AppConfig, logger: Console) {
+export function processSourcePath(sourcePath: string, appConfig: AppConfig, logger: Console): void {
   if (!sourcePathIsQualified(sourcePath, appConfig, logger)) {
     return;
   }
@@ -87,6 +87,34 @@ function sourcePathIsQualified(sourcePath: string, appConfig: AppConfig, logger:
   return true;
 }
 
+function rotateOldLogs(logDirectory: string): void {
+  try {
+    if (!fs.existsSync(logDirectory)) {
+      return;
+    }
+
+    const files = fs.readdirSync(logDirectory);
+    const now = new Date();
+    const tenDaysAgo = new Date(now.getTime() - 10 * 24 * 60 * 60 * 1000);
+
+    files.forEach(file => {
+      const match = file.match(/^linker-(\d{4})(\d{2})(\d{2})\.log$/);
+      if (match) {
+        const [, year, month, day] = match;
+        const fileDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+
+        if (fileDate < tenDaysAgo) {
+          const filePath = path.join(logDirectory, file);
+          fs.unlinkSync(filePath);
+          console.info(`Deleted old log file: ${file}`);
+        }
+      }
+    });
+  } catch (error) {
+    console.error('Error rotating logs:', error);
+  }
+}
+
 export function getLogger(): Console {
   if (!process.env.WRITE_LOGS) {
     return console;
@@ -100,5 +128,9 @@ export function getLogger(): Console {
     logfilePath = (customLogPath && customLogPath.length > 0)
       ? customLogPath
       : `/logs/linker-${year}${month}${day}.log`;
+
+  const logDirectory = path.dirname(logfilePath);
+  rotateOldLogs(logDirectory);
+
   return new Logger(logfilePath);
 }

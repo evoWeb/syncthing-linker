@@ -2,18 +2,20 @@ import { BaseAPI, RequestParameters } from './BaseAPI';
 import { ServiceConfig } from './ServiceConfig';
 import { SyncthingException } from './SyncthingException';
 
+export interface EventData {
+  action: string;
+  error: string | null;
+  folder?: string;
+  item?: string;
+  type?: string;
+}
+
 export interface Event {
   id: number;
   globalID: number;
   time: string;
   type: string;
-  data: {
-    action: string;
-    error: string | null;
-    folder: string;
-    item: string;
-    type: string;
-  };
+  data: EventData;
 }
 
 export class Events extends BaseAPI {
@@ -36,7 +38,7 @@ export class Events extends BaseAPI {
   private _lastSeenId: number;
   private _count: number = 0;
 
-  constructor(config: ServiceConfig, logger: Console, lastSeenId: number = 0, filters?: string[], limit: number = 50) {
+  constructor(config: ServiceConfig, logger: Console, lastSeenId: number, filters?: string[], limit: number = 50) {
     super(config, logger);
     this._lastSeenId = lastSeenId;
     this.filters = filters;
@@ -123,8 +125,7 @@ export class Events extends BaseAPI {
         }
         this._lastSeenId = data[data.length - 1].id;
       }
-      /* eslint-disable @typescript-eslint/no-explicit-any */
-    } catch (error: any) {
+    } catch (error) {
       throw new SyncthingException('Timeout while fetching new events', { cause: error });
     }
   }
