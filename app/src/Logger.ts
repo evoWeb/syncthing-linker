@@ -1,6 +1,35 @@
 import fs from 'fs';
 import { WriteStream } from 'fs';
+import * as path from 'path';
 import { format } from 'util';
+
+function rotateOldLogs(logDirectory: string): void {
+  try {
+    if (!fs.existsSync(logDirectory)) {
+      return;
+    }
+
+    const files = fs.readdirSync(logDirectory);
+    const now = new Date();
+    const tenDaysAgo = new Date(now.getTime() - 10 * 24 * 60 * 60 * 1000);
+
+    files.forEach(file => {
+      const match = file.match(/^linker-(\d{4})(\d{2})(\d{2})\.log$/);
+      if (match) {
+        const [, year, month, day] = match;
+        const fileDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+
+        if (fileDate < tenDaysAgo) {
+          const filePath = path.join(logDirectory, file);
+          fs.unlinkSync(filePath);
+          console.info(`Deleted old log file: ${file}`);
+        }
+      }
+    });
+  } catch (error) {
+    console.error('Error rotating logs:', error);
+  }
+}
 
 export class Logger implements Console {
   protected channel: string;
@@ -11,6 +40,26 @@ export class Logger implements Console {
     this.channel = channel?.toLowerCase() || '';
     this.logWriter = fs.createWriteStream(logFilePath, {flags: 'a', mode: 0o644});
     this.registerCleanupHandlers();
+  }
+
+  static getInstance(channel?: string): Console {
+    if (!process.env.WRITE_LOGS) {
+      return console;
+    }
+
+    const now = new Date(),
+      year = now.getFullYear(),
+      month = String(now.getMonth() + 1).padStart(2, '0'),
+      day = String(now.getDate()).padStart(2, '0'),
+      logPathOverride = process.env.LOG_PATH?.trim(),
+      logfilePath = (logPathOverride && logPathOverride.length > 0)
+        ? logPathOverride
+        : `/logs/linker-${year}${month}${day}.log`;
+
+    const logDirectory = path.dirname(logfilePath);
+    rotateOldLogs(logDirectory);
+
+    return new Logger(logfilePath, channel);
   }
 
   private registerCleanupHandlers(): void {

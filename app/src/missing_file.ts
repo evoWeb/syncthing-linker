@@ -1,13 +1,14 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
-import { initializeAppConfig, processSourcePath } from './utilities';
+import { AppConfig } from './AppConfig';
+import { processSourcePath } from './utilities';
 
-function walkSync(dir: string, callback: (filePath: string) => void): void {
-  fs.readdirSync(dir)
+function walkSync(directory: string, callback: (filePath: string) => void): void {
+  fs.readdirSync(directory)
     .forEach(file => {
-      const filePath = path.join(dir, file);
-      const stat = fs.statSync(filePath);
+      const filePath = path.join(directory, file),
+        stat = fs.statSync(filePath);
       if (stat.isDirectory()) {
         walkSync(filePath, callback);
       } else {
@@ -18,17 +19,16 @@ function walkSync(dir: string, callback: (filePath: string) => void): void {
 
 async function main(): Promise<void> {
   const logger: Console = console,
-    appConfig = initializeAppConfig();
+    appConfig = AppConfig.getInstance();
 
-  const source = appConfig.source;
-  logger.info(`Searching in ${source}`);
+  logger.info(`Searching in ${appConfig.source}`);
 
-  if (!fs.existsSync(source)) {
-    logger.error(`Ignoring because ${source} does not exist.`);
+  if (!fs.existsSync(appConfig.source)) {
+    logger.error(`Ignoring because ${appConfig.source} does not exist.`);
     return;
   }
 
-  walkSync(source, filePath => {
+  walkSync(appConfig.source, filePath => {
     processSourcePath(filePath, appConfig, logger);
   });
 }

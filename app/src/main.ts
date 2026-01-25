@@ -5,7 +5,9 @@ import { Database } from './syncthing/Database';
 import { Events, Event, EventData } from './syncthing/Events';
 import { System } from './syncthing/System';
 import { ServiceConfig } from './syncthing/ServiceConfig';
-import { initializeAppConfig, processSourcePath, getLogger } from './utilities';
+import { AppConfig } from './AppConfig';
+import { Logger } from './Logger';
+import { processSourcePath } from './utilities';
 
 /**
  * Checks the connection to the Syncthing API
@@ -56,13 +58,13 @@ function sleep(ms: number): Promise<void> {
 }
 
 async function main(): Promise<void> {
-  const logger: Console = getLogger('main'),
-    eventLogger: Console = getLogger('event'),
-    appConfig = initializeAppConfig();
+  const logger: Console = Logger.getInstance('main'),
+    eventLogger: Console = Logger.getInstance('event'),
+    appConfig = AppConfig.getInstance();
 
-  await checkServiceConfig(appConfig, getLogger('system'));
-  const config = new Config(appConfig, getLogger('config')),
-    database = new Database(appConfig, getLogger('database'));
+  await checkServiceConfig(appConfig, Logger.getInstance('system'));
+  const config = new Config(appConfig, Logger.getInstance('config')),
+    database = new Database(appConfig, Logger.getInstance('database'));
 
   let lastSeenId: number = 0,
     continueWorking: boolean = true;
