@@ -41,7 +41,7 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
       # source and destination folders need to be subfolders of files
-      # @see config/config.yaml line 1-2
+      # @see config/config.json line 1-2
       - files:/files
     environment:
       PUID: 1000

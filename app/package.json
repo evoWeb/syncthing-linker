@@ -10,13 +10,9 @@
     "missing-files": "npx tsc && node dist/missing_file.ts",
     "lint": "eslint -c eslint.config.mjs src/**/*.ts"
   },
-  "dependencies": {
-    "js-yaml": "^4.1.0"
-  },
   "devDependencies": {
     "@stylistic/eslint-plugin": "^5.7.1",
     "@typescript-eslint/eslint-plugin": "^8.54.0",
-    "@types/js-yaml": "^4.0.9",
     "@types/node": "^25.1.0",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.9.3",

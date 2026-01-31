@@ -1,5 +1,4 @@
 import * as fs from 'fs';
-import * as yaml from 'js-yaml';
 
 import ServiceConfig, { DEFAULT_TIMEOUT } from './syncthing/ServiceConfig';
 
@@ -19,9 +18,9 @@ export default class AppConfig extends ServiceConfig {
     super(apiKey, host, port, timeout, isHttps, sslCertFile);
   }
 
-  static getInstance(configPath: string = '/config/config.yaml'): AppConfig {
+  static getInstance(configPath: string = '/config/config.json'): AppConfig {
     const fileContents = fs.readFileSync(configPath, 'utf8'),
-      config: any = yaml.load(fileContents);
+      config: any = JSON.parse(fileContents);
 
     if (!config) {
       throw new Error('Configuration is empty.');

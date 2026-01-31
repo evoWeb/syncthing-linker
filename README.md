@@ -132,21 +132,23 @@ services:
 
 ## Advanced Configuration
 
-If you need a different folder structure, you can override the default configuration by mounting a config/config.yaml
+If you need a different folder structure, you can override the default configuration by mounting a config/config.json
 file into the container.
 
-config/config.yaml:
-```yaml
-# Paths are absolute inside the container
-source: /files/source
-destination: /files/destination
+config/config.json:
+```json
+{
+    "source_description": "Paths are absolute inside the container",
+    "source": "/files/source",
+    "destination": "/files/destination",
 
-# Regex pattern for files to ignore
-excludes: '\.tmp$|(?i)desktop\.ini'
+    "excludes_description": "Regex pattern for files to ignore",
+    "excludes": "\\.tmp$|(?i)desktop\\.ini",
 
-# Comma-separated list of Syncthing events to listen to
-# Default: ItemFinished
-filter: ItemFinished,FolderSummary
+    "filter_description1": "Comma-separated list of Syncthing events to listen to",
+    "filter_description2": "Default: ItemFinished",
+    "filter": "ItemFinished,FolderSummary"
+}
 ```
 
 ### Folder Structure Example
@@ -161,10 +163,12 @@ base-folder/
   shadow/
 ```
 
-This would require that the config.yaml file looks like this:
-```yaml
-sources: /base-folder/target
-destinations: /base-folder/shadow
+This would require that the config.json file looks like this:
+```json
+{
+    "sources": "/base-folder/target",
+    "destinations": "/base-folder/shadow"
+}
 ```
 And the docker-compose.yaml would look like this:
 ```yaml
