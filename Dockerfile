@@ -1,5 +1,5 @@
 # Stage 1: Builder
-FROM node:20-alpine AS builder
+FROM node:25-alpine AS builder
 
 WORKDIR /build
 
@@ -12,7 +12,7 @@ RUN npm install
 RUN npm run build
 
 # Stage 2: Final Image
-FROM node:20-alpine
+FROM node:25-alpine
 
 # Install su-exec for privilege dropping
 COPY entrypoint.sh /entrypoint.sh
