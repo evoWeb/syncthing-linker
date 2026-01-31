@@ -1,9 +1,18 @@
-import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 import * as fs from 'fs';
 import * as https from 'https';
 
 import SyncthingException from './SyncthingException';
 import ServiceConfig from './ServiceConfig';
+
+type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE';
+
+interface RequestConfig {
+  method: string;
+  headers: Headers;
+  signal: AbortSignal;
+  agent?: https.Agent;
+  body?: string;
+}
 
 export interface RequestData {
   device?: string;
@@ -35,6 +44,13 @@ export interface RequestParameters {
   events?: string;
   address?: string;
   current?: string;
+}
+
+export interface Response<T> {
+  data: T;
+  status: number;
+  statusText: string,
+  headers: Headers;
 }
 
 
@@ -100,14 +116,14 @@ export default class RequestBase {
     return await this.request<T>('DELETE', this.prefix + endpoint, data, headers, params);
   }
 
-  protected async request<T>(
-    method: string,
+  private async request<T>(
+    method: HttpMethod,
     endpoint: string,
     data?: RequestData,
     headers?: RequestHeaders,
     params?: RequestParameters
   ): Promise<T> {
-    const response: AxiosResponse<T> | undefined = await this.raw_request(method, endpoint, data, headers, params);
+    const response = await this.raw_request<T>(method, endpoint, data, headers, params);
     if (!response) {
       throw new SyncthingException('No response from Syncthing API');
     }
@@ -123,61 +139,67 @@ export default class RequestBase {
     return response.data;
   }
 
-  protected async raw_request<T>(
-    method: string,
+  private async raw_request<T>(
+    method: HttpMethod,
     endpoint: string,
     data?: RequestData,
     headers?: RequestHeaders,
     params?: RequestParameters
-  ): Promise<AxiosResponse<T>> {
-    method = method.toUpperCase();
-    endpoint = new URL(endpoint, this.url).toString();
-
-    if (!['GET', 'POST', 'PUT', 'DELETE'].includes(method)) {
-      throw new SyncthingException(`unsupported http verb requested, ${method}`);
+  ): Promise<Response<T>> {
+    const url = new URL(endpoint, this.url);
+    if (params) {
+      Object.entries(params).forEach(([key, value]) =>
+        url.searchParams.append(key, String(value))
+      );
     }
 
-    if (data === undefined) {
-      data = {};
-    }
-
-    if (headers === undefined) {
-      headers = {};
-    }
-
-    if (typeof data !== 'object' || Array.isArray(data)) {
-      throw new Error('Data must be an object');
-    }
-    if (typeof headers !== 'object' || Array.isArray(headers)) {
-      throw new Error('Headers must be an object');
-    }
-
-    let result: AxiosResponse<T>;
-    try {
-      headers = Object.assign(headers, this.headers);
-
-      const axiosConfig: AxiosRequestConfig = {
-        url: endpoint,
-        method: method,
-        headers: headers as object,
-        params: params,
-        data: data,
-        timeout: this.serviceConfig.timeout * 1000,
+    const controller = new AbortController(),
+      timeoutId = setTimeout(() => controller.abort(), this.serviceConfig.timeout * 1000),
+      mergedHeaders = new Headers({
+        ...this.headers,
+        ...headers,
+        'Content-Type': 'application/json'
+      }),
+      fetchConfig: RequestConfig = {
+        method: method.toString().toUpperCase(),
+        headers: mergedHeaders,
+        signal: controller.signal,
       };
 
-      if (this.verify && this.serviceConfig.sslCertFile) {
-        axiosConfig.httpsAgent = new https.Agent({
-          ca: fs.readFileSync(this.serviceConfig.sslCertFile, 'utf8')
-        });
+    // Body nur bei entsprechenden Methoden hinzufügen
+    if (method !== 'GET' && data && Object.keys(data).length > 0) {
+      fetchConfig.body = JSON.stringify(data);
+    }
+
+    if (this.verify && this.serviceConfig.sslCertFile) {
+      fetchConfig.agent = new https.Agent({
+        ca: fs.readFileSync(this.serviceConfig.sslCertFile, 'utf8')
+      });
+    }
+
+    try {
+      const response = await fetch(url.toString(), fetchConfig);
+      clearTimeout(timeoutId);
+
+      const isJson = response.headers.get('content-type')?.includes('application/json');
+      const responseData = isJson ? await response.json() : await response.text();
+
+      if (!response.ok) {
+        throw new SyncthingException(`HTTP request error: ${response.status}`);
       }
-      result = await axios.request<T>(axiosConfig);
+
+      return {
+        data: responseData as T,
+        status: response.status,
+        statusText: response.statusText,
+        headers: response.headers
+      };
       /* eslint-disable @typescript-eslint/no-explicit-any */
     } catch (error: any) {
-      if (axios.isAxiosError(error)) {
-        throw new SyncthingException('HTTP request error', { cause: error });
+      if (error.name === 'AbortError') {
+        throw new SyncthingException('Request timeout', { cause: error });
       }
-      result = error.response;
+      throw error;
     }
-    return result;
   }
 }
