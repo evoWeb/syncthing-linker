@@ -1,4 +1,0 @@
-PyYAML
-python-dateutil
-requests
-urllib3

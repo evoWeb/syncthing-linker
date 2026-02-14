@@ -1,3 +1,7 @@
 __pycache__
+/app/dist/
+/app/node_modules/
+/syncthing-config/
 /files/
+/logs/
 .env

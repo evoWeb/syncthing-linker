@@ -1,0 +1,21 @@
+{
+  "name": "syncthing-linker",
+  "version": "1.0.0",
+  "description": "Hardlinks Syncthing files based on events",
+  "main": "dist/main.js",
+  "scripts": {
+    "build": "npm run lint && tsc",
+    "start": "node dist/main.js",
+    "dev": "ts-node-dev --respawn src/main.ts",
+    "missing-files": "npx tsc && node dist/missing_file.ts",
+    "lint": "eslint -c eslint.config.mjs src/**/*.ts"
+  },
+  "devDependencies": {
+    "@stylistic/eslint-plugin": "^5.7.1",
+    "@typescript-eslint/eslint-plugin": "^8.54.0",
+    "@types/node": "^25.1.0",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.9.3",
+    "eslint": "^9.39.2"
+  }
+}

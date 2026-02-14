@@ -1,0 +1,7 @@
+{
+	"source": "/files/source/",
+	"destination": "/files/destination/",
+
+	"filters": "ItemFinished",
+	"excludes": ".*\\.tmp|.*/shadows/.*|.*/\\.stfolder.*/.*|.*/config/.*"
+}

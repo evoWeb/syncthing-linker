@@ -9,30 +9,43 @@ volumes:
       o: bind
       type: none
       device: ${APP_FOLDER:-./app}
-  config:
+  linker-config:
     driver: local
     driver_opts:
       o: bind
       type: none
       device: ${CONFIG_FOLDER:-./config}
+  syncthing-config:
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: ${CONFIG_FOLDER:-./syncthing-config}
   files:
     driver: local
     driver_opts:
       o: bind
       type: none
       device: ${SOURCE_FOLDER:-./files}
+  logs:
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: ${LOG_FOLDER:-./logs}
 
 services:
   linker:
     image: evoweb/syncthing-linker:${TAG:-latest}
     volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
       # source and destination folders need to be subfolders of files
-      # @see config/config.yaml line 1-2
+      # @see config/config.json line 1-2
       - files:/files
     environment:
       PUID: 1000
       PGID: 1000
-      TZ: Europe/Berlin
       SYNCTHING_HOST: "${SYNCTHING_HOST:-syncthing}"
       SYNCTHING_PORT: "${SYNCTHING_PORT:-8384}"
       SYNCTHING_API_KEY: "${SYNCTHING_API_KEY}"
@@ -40,24 +53,47 @@ services:
     networks:
       - syncthing
 
-  linker-development:
-    image: evoweb/syncthing-linker:${TAG:-latest}
-    build:
-      context: .
-      dockerfile: Dockerfile
-    command: sleep infinity
+  syncthing:
+    image: lscr.io/linuxserver/syncthing:latest
     volumes:
-      - app:/usr/src/app
-
-      - config:/config
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+      - syncthing-config:/config
+      # Should contain the same folders as in the linker service
       - files:/files
     environment:
       PUID: 1000
       PGID: 1000
-      TZ: Europe/Berlin
+    ports:
+      - "8384:8384"
+      - "22000:22000/tcp"
+      - "22000:22000/udp"
+      - "21027:21027/udp"
+    restart: unless-stopped
+    networks:
+      - syncthing
+
+  development:
+    image: evoweb/syncthing-linker:${TAG:-latest}
+    build:
+      context: .
+      dockerfile: Dockerfile
+    profiles:
+      - donotstart
+    command: sleep infinity
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+      - app:/usr/src/app
+      - linker-config:/config
+      - files:/files
+      - logs:/logs
+    environment:
+      PUID: 1000
+      PGID: 1000
       SYNCTHING_HOST: "${SYNCTHING_HOST:-syncthing}"
       SYNCTHING_PORT: "${SYNCTHING_PORT:-8384}"
       SYNCTHING_API_KEY: "${SYNCTHING_API_KEY}"
-    restart: no
+      WRITE_LOGS: true
     networks:
       - syncthing

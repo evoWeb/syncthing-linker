@@ -1,20 +1,38 @@
 # Stage 1: Builder
-FROM python:3-alpine AS builder
+FROM node:25-alpine AS builder
 
 WORKDIR /build
-COPY requirements.txt .
 
-RUN pip install --no-cache-dir --prefix=/install -r requirements.txt
+COPY app/eslint.config.mjs ./
+COPY app/package*.json ./
+COPY app/tsconfig.json ./
+COPY app/src ./src
+
+RUN npm install
+RUN npm run build
 
 # Stage 2: Final Image
-FROM python:3-alpine
+FROM node:25-alpine
 
-ENV PYTHONUNBUFFERED=1
+# Install su-exec for privilege dropping
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+RUN apk add --no-cache su-exec
+ENTRYPOINT ["/entrypoint.sh"]
+
 WORKDIR /usr/src/app
 
-COPY --from=builder /install /usr/local
+COPY app/package*.json ./
+RUN npm install --production
 
-COPY app/. .
+COPY --from=builder /build/dist ./dist
 COPY config /config
 
-CMD [ "python", "main.py" ]
+HEALTHCHECK \
+    --interval=30s \
+    --timeout=10s \
+    --start-period=5s \
+    --retries=3 \
+    CMD pgrep -f "node dist/main.js" || exit 1
+
+CMD ["node", "dist/main.js"]
